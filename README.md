@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# Reference-based Ancestry INference <!--<img src="man/figures/rain.png" align="right" width="120" />-->
+# Reference-based Ancestry INference <img src="man/figures/rain.png" align="right" width="120" />
 
 <!-- badges: start -->
 
