@@ -2,18 +2,47 @@ Package: rain
 Title: Reference-based Ancestry INference
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "Mickaël",
-           family = "Canouil",
-           role = c("aut", "cre"),
-           email = "mickael.canouil@cnrs.fr",
-           comment = c(ORCID = "0000-0002-3396-4549"))
+    c(person(given = "Mickaël",
+             family = "Canouil",
+             role = c("aut", "cre"),
+             email = "mickael.canouil@cnrs.fr",
+             comment = c(ORCID = "0000-0002-3396-4549")),
+      person(given = "Mathilde",
+             family = "Boissel",
+             role = "aut",
+             email = "mathilde.boissel@cnrs.fr",
+             comment = c(ORCID = "0000-0001-5719-8749"))
+    )
 Description: What the package does (one paragraph).
 License: GPL-3
-Suggests: 
-    testthat
+URL: https://github.com/mcanouil/rain,
+    https://mcanouil.github.io/rain
+BugReports: https://github.com/mcanouil/rain/issues
+Depends: 
+    R (>= 3.5.0)
+Imports:
+    magrittr,
+    rlang,
+    R.utils, 
+    dplyr, 
+    flashpcaR, 
+    fs, 
+    ggforce, 
+    ggplot2, 
+    glue, 
+    purrr,
+    readr, 
+    scales, 
+    tidyr
+Suggests:
+    covr (>= 3.3.2),
+    roxygen2 (>= 6.1.1),
+    testthat (>= 2.2.1)
+Remotes: 
+    github::gabraham/flashpca/flashpcaR
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.0.2
-URL: https://github.com/mcanouil/rain
-BugReports: https://github.com/mcanouil/rain/issues
+SystemRequirements: pandoc (>= 1.12.3) - http://pandoc.org,
+    bcftools, vcftools, bgzip, tabix, plink1.9, gcta64,

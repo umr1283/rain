@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Reference-based Ancestry INference <!--<img src="man/figures/rain.png" align="right" width="120" />-->
+# Reference-based Ancestry INference <img src="man/figures/rain.png" align="right" width="120" />
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
