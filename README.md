@@ -1,26 +1,18 @@
----
-output: github_document
----
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-
-```{r, echo = FALSE}
-knitr::opts_chunk$set(
-  eval = FALSE,
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
 
 # Reference-based Ancestry INference <!--<img src="man/figures/rain.png" align="right" width="120" />-->
 
 <!-- badges: start -->
-[![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![GitHub tag](https://img.shields.io/github/tag/mcanouil/rain.svg?label=latest tag)](https://github.com/mcanouil/rain)
-[![Travis-CI Build Status](https://travis-ci.org/mcanouil/rain.svg?branch=master)](https://travis-ci.org/mcanouil/rain)
-[![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/rain?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/rain)
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![GitHub
+tag](https://img.shields.io/github/tag/mcanouil/rain.svg?label=latest%20tag)](https://github.com/mcanouil/rain)
+[![Travis-CI Build
+Status](https://travis-ci.org/mcanouil/rain.svg?branch=master)](https://travis-ci.org/mcanouil/rain)
+[![AppVeyor Build
+Status](https://ci.appveyor.com/api/projects/status/github/mcanouil/rain?branch=master&svg=true)](https://ci.appveyor.com/project/mcanouil/rain)
 <!--[![Coverage Status (codecov)](https://codecov.io/gh/mcanouil/rain/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/rain) -->
 <!--[![CRAN_Status_Badge](http://www.r-pkg.org/badges/version-ago/rain)](https://cran.r-project.org/package=rain) -->
 <!--[![cran checks_worst](https://cranchecks.info/badges/worst/rain)](https://cran.r-project.org/web/checks/check_results_rain.html) -->
@@ -33,7 +25,7 @@ knitr::opts_chunk$set(
 
 ## Installation
 
-```{r, eval = FALSE}
+``` r
 # Install rain from CRAN:
 install.packages("rain")
 
@@ -42,16 +34,4 @@ install.packages("rain")
 remotes::install_github("mcanouil/rain")
 ```
 
-
-## Overview 
-
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  eval = FALSE,
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
-
+## Overview
