@@ -36,13 +36,4 @@ remotes::install_github("mcanouil/rain")
 
 ## Overview 
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  eval = FALSE,
-  collapse = TRUE,
-  comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-```
 
