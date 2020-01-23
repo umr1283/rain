@@ -26,8 +26,12 @@ remotes::install_github("mcanouil/rain")
 
 ## Overview
 
-  - `estimate_ethnicity()` allows to format VCF files and compute the
-    genomic components (and some figures) for ethnicity.
+  - estimate\_ethnicity() allows to format VCF files and compute the
+    genomic components (and some figures) for ethnicity using
+    [flashpca](https://github.com/gabraham/flashpca) software
+  - pca\_report() allows to compute an analysis report using principal
+    component analysis from
+    [flashpca](https://github.com/gabraham/flashpca) software.
 
 ## Getting help
 
