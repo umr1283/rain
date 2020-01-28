@@ -12,7 +12,9 @@ Authors@R:
              role = "aut",
              email = "mathilde.boissel@cnrs.fr",
              comment = c(ORCID = "0000-0001-5719-8749")))
-Description: What the package does (one paragraph).
+Description: Compute ancestry inference (principal component analysis) of a set of individuals 
+    using either array or sequencing data (i.e., plink or VCF format) 
+    and a reference panel (e.g., 1,000 genomes project).
 License: GPL-3
 URL: https://github.com/mcanouil/rain,
     https://mcanouil.github.io/rain
