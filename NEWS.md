@@ -1,4 +1,4 @@
-# rain (development version)
+# rain 0.1.0
 
 ## New features
 
@@ -6,11 +6,11 @@
     component analysis from
     [flashpca](https://github.com/gabraham/flashpca) tool.  
     The function can be used in a chunk within a Rmarkdown
-    document/script with `results="asis"` to render the report. omicsr/CARoT@dac458f
+    document/script with `results="asis"` to render the report. ([CARoT v0.4.0](https://github.com/omicsr/CARoT/tree/v0.4.0))
 
 # rain 0.1.0
 
 ## New features
 
 * `estimate_ethnicity()` allows to format VCF files and compute the
-    genomic components (and some figures) for ethnicity. (omicsr/CARoT@dac458f)
+    genomic components (and some figures) for ethnicity. ([CARoT v0.4.0](https://github.com/omicsr/CARoT/tree/v0.4.0))
