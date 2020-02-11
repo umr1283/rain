@@ -6,7 +6,7 @@
     component analysis from
     [flashpca](https://github.com/gabraham/flashpca) tool.  
     The function can be used in a chunk within a Rmarkdown
-    document/script with `results="asis"` to render the report. (omicsr/CARoT@dac458f)
+    document/script with `results="asis"` to render the report. omicsr/CARoT@dac458f
 
 # rain 0.1.0
 
