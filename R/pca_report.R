@@ -41,15 +41,17 @@ pca_report <- function(
   title_level = 2
 ) {
   message_prefix <- "[CARoT] "
-  message(message_prefix, "Quality-Control started ...")
+  message(message_prefix, "PCA started ...")
 
   if (!inherits(design, "data.frame")) stop(message_prefix, '"design" must be a "data.frame"!')
 
-  design <- dplyr::mutate_at(design, dplyr::vars(id_var), as.character)
+  design <- design %>%
+    dplyr::mutate_at(dplyr::vars(all_of(id_var)), as.character) %>%
+    dplyr::filter(.data[[id_var]] %in% !!colnames(data))
 
   keep_technical <- design %>%
     dplyr::summarise_at(
-      .vars = dplyr::vars(technical_vars),
+      .vars = dplyr::vars(all_of(technical_vars)),
       .funs = ~ dplyr::n_distinct(.x) > 1 & dplyr::n_distinct(.x) < length(.x)
     ) %>%
     dplyr::select_if(~ all(isTRUE(.x)), identity) %>%
@@ -176,9 +178,11 @@ pca_report <- function(
       dplyr::mutate(
         dist_centre = sqrt(as.vector(scale(.data[[pcs[1]]]))^2 + as.vector(scale(.data[[pcs[2]]]))^2),
         high = .data[["dist_centre"]] >=
-          (stats::median(.data[["dist_centre"]]) + !!outliers_threshold * stats::IQR(.data[["dist_centre"]])),
+          (stats::median(.data[["dist_centre"]], na.rm = TRUE) +
+            !!outliers_threshold * stats::IQR(.data[["dist_centre"]], na.rm = TRUE)),
         low = .data[["dist_centre"]] <=
-          (stats::median(.data[["dist_centre"]]) - !!outliers_threshold * stats::IQR(.data[["dist_centre"]])),
+          (stats::median(.data[["dist_centre"]], na.rm = TRUE) -
+             !!outliers_threshold * stats::IQR(.data[["dist_centre"]], na.rm = TRUE)),
         bad_samples_bool = .data[["high"]] | .data[["low"]],
         dist_centre = NULL,
         high = NULL,
@@ -201,7 +205,7 @@ pca_report <- function(
         )
       ) %>%
       tidyr::unnest(.data[["data"]]) %>%
-      dplyr::mutate_at(dplyr::vars(ivar), as.character) %>%
+      dplyr::mutate_at(dplyr::vars(all_of(ivar)), as.character) %>%
       ggplot2::ggplot(mapping = ggplot2::aes(x = .data[["X"]], y = .data[["Y"]], colour = .data[[ivar]])) +
       ggplot2::geom_hline(yintercept = 0, na.rm = TRUE) +
       ggplot2::geom_vline(xintercept = 0, na.rm = TRUE) +
@@ -221,7 +225,7 @@ pca_report <- function(
 
   }
 
-  message(message_prefix, "Quality-Control ended.")
+  message(message_prefix, "PCA ended.")
 
   invisible(pca_dfxy)
 }
