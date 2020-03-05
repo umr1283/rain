@@ -1,4 +1,4 @@
-# rain 0.1.0
+# rain 0.2.0
 
 ## New features
 
@@ -6,7 +6,8 @@
     component analysis from
     [flashpca](https://github.com/gabraham/flashpca) tool.  
     The function can be used in a chunk within a Rmarkdown
-    document/script with `results="asis"` to render the report. ([CARoT v0.4.0](https://github.com/omicsr/CARoT/tree/v0.4.0))
+    document/script with `results="asis"` to render the report 
+    (from [CARoT v0.4.0](https://github.com/omicsr/CARoT/tree/v0.4.0)).
 
 # rain 0.1.0
 

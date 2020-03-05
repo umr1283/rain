@@ -18,8 +18,7 @@ knitr::opts_chunk$set(
 
 <!-- badges: start -->
 [![Lifecycle: experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
-[![GitHub tag](https://img.shields.io/github/tag/mcanouil/rain.svg?label=latest tag)](https://github.com/mcanouil/rain)
-[![Coverage Status (codecov)](https://codecov.io/gh/mcanouil/rain/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/rain)
+[![GitHub tag](https://img.shields.io/github/tag/mcanouil/rain.svg?label=latest tag&include_prereleases)](https://github.com/mcanouil/rain)
 <!-- badges: end -->
 
 ## Installation

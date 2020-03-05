@@ -8,9 +8,7 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![GitHub
-tag](https://img.shields.io/github/tag/mcanouil/rain.svg?label=latest%20tag)](https://github.com/mcanouil/rain)
-[![Coverage Status
-(codecov)](https://codecov.io/gh/mcanouil/rain/branch/master/graph/badge.svg)](https://codecov.io/gh/mcanouil/rain)
+tag](https://img.shields.io/github/tag/mcanouil/rain.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/rain)
 <!-- badges: end -->
 
 ## Installation
