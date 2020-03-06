@@ -1,3 +1,10 @@
+# rain 0.3.0
+
+## Minor improvements and fixes
+
+- Remove `covr`.
+- Remove `testthat`.
+
 # rain 0.2.0
 
 ## New features
