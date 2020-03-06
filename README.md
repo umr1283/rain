@@ -34,7 +34,7 @@ remotes::install_github("mcanouil/rain")
 ## Getting help
 
 If you encounter a clear bug, please file a minimal reproducible example
-on [github](https://github.com/mcanouil/CARoT/issues).  
+on [github](https://github.com/mcanouil/rain/issues).  
 For questions and other discussion, please contact the package
 maintainer.
 
