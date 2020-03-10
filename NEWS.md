@@ -1,3 +1,10 @@
+# rain (development version)
+
+## Minor improvements and fixes
+
+* Use `file.path()` instead of `paste()`.
+* Change messages prefix.
+
 # rain 0.3.0
 
 ## Minor improvements and fixes

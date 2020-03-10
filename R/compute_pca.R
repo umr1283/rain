@@ -6,7 +6,7 @@
 #' @return A `data.frame`.
 #' @export
 compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_population) {
-  message_prefix <- "[CARoT] "
+  message_prefix <- "[rain] "
 
   ######################
   ### Performing PCA ###

@@ -4,7 +4,7 @@
 #'
 #' @keywords internal
 is_ethnicity_done <- function(output_directory) {
-  message_prefix <- "[CARoT] "
+  message_prefix <- "[rain] "
 
   plink_files_exists <- all(file.exists(paste0(output_directory, "/all", c(".bim", ".fam", ".bed"))))
 

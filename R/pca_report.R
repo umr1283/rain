@@ -40,7 +40,7 @@ pca_report <- function(
   outliers_threshold = 3,
   title_level = 2
 ) {
-  message_prefix <- "[CARoT] "
+  message_prefix <- "[rain] "
   message(message_prefix, "PCA started ...")
 
   if (!inherits(design, "data.frame")) stop(message_prefix, '"design" must be a "data.frame"!')
