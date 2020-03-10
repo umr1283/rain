@@ -5,7 +5,7 @@
 #' @keywords internal
 check_bin <- function(bin_path) {
   if (!all(sapply(bin_path, file.exists))) {
-    message_prefix <- "[CARoT] "
+    message_prefix <- "[rain] "
     stop(
       message_prefix,
       paste0(

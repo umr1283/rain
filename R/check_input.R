@@ -4,7 +4,7 @@
 #'
 #' @keywords internal
 check_input <- function(input) {
-  message_prefix <- "[CARoT] "
+  message_prefix <- "[rain] "
 
   name <- deparse(substitute(input))
   is_input_good <- (length(input) == 1 && (fs::is_dir(input) | fs::is_file(input))) |

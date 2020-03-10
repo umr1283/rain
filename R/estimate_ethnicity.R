@@ -44,7 +44,7 @@ estimate_ethnicity <- function(
     plink1.9 = "/usr/bin/plink1.9"
   )
 ) {
-  message_prefix <- "[CARoT] "
+  message_prefix <- "[rain] "
 
   check_bin(bin_path)
 
