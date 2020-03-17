@@ -1,3 +1,13 @@
+# rain (development version)
+
+## Minor improvements and fixes
+
+* Use `patchwork` for ethnicity plot.
+* In `R/compute_pca.R`, 
+    - fix a missplaced `.data` pronoun.
+    - core code rewrite.
+* Remove `gcta64` from system requirements.
+
 # rain 0.3.1
 
 ## Minor improvements and fixes
