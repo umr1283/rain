@@ -1,3 +1,13 @@
+# rain 0.3.2
+
+## Minor improvements and fixes
+
+* Remove dependency to `R.utils`.
+* Use `patchwork` for figure.
+* Internal core code rewrite.
+* Fix `.data` pronoun misplaced.
+* In `/R/pca_report.R`, add packages prefix for `tidyselect`.
+
 # rain 0.3.1
 
 ## Minor improvements and fixes
