@@ -29,6 +29,7 @@ Imports:
     ggplot2 (>= 3.2.1),
     glue (>= 1.3.1),
     magrittr (>= 1.5),
+    patchwork (>= 1.0.0),
     purrr (>= 0.3.3),
     R.utils (>= 2.9.2),
     readr (>= 1.3.1),
@@ -44,5 +45,5 @@ Remotes:
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.0.2
-SystemRequirements: bcftools, vcftools, bgzip, tabix, plink1.9, gcta64
+RoxygenNote: 7.1.0
+SystemRequirements: bcftools, vcftools, bgzip, tabix, plink1.9
