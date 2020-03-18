@@ -1,24 +1,14 @@
-<<<<<<< HEAD
 # rain 0.3.2
 
 ## Minor improvements and fixes
 
-* Remove dependency to `R.utils`.
-* Use `patchwork` for figure.
-* Internal core code rewrite.
-* Fix `.data` pronoun misplaced.
-* In `/R/pca_report.R`, add packages prefix for `tidyselect`.
-=======
-# rain (development version)
-
-## Minor improvements and fixes
-
 * Use `patchwork` for ethnicity plot.
-* In `R/compute_pca.R`, 
+* In `/R/compute_pca.R`, 
     - fix a missplaced `.data` pronoun.
     - core code rewrite.
+* In `/R/pca_report.R`, add packages prefix for `tidyselect`.
 * Remove `gcta64` from system requirements.
->>>>>>> 83d2ee338b41c9a6447901e9a778ac69958d699d
+* Remove dependency to `R.utils`.
 
 # rain 0.3.1
 
