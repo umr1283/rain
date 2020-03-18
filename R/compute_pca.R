@@ -24,10 +24,18 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     col_names = FALSE
   )
 
+<<<<<<< HEAD
   pca_ndim <- 10
   res_pca <- flashpcaR::flashpca(input_plink, ndim = pca_ndim)
   pca_gg <- dplyr::as_tibble(x = res_pca[["projection"]], .name_repair = ~ sprintf("PC%02d", 1:pca_ndim))
 
+=======
+  res_pca <- flashpcaR::flashpca(input_plink, ndim = 10)
+
+  pca_gg <- res_pca[["projection"]] %>%
+    dplyr::as_tibble() %>%
+    purrr::set_names(paste0("PC", sprintf("%02d", seq_len(ncol(.)))))
+>>>>>>> 83d2ee338b41c9a6447901e9a778ac69958d699d
 
   if (all.equal(fid_iid[[1]], fid_iid[[2]])) {
     pca_gg[["sample"]] <- fid_iid[[2]]
@@ -45,6 +53,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
             pop = readr::col_character(),
             super_pop = readr::col_character()
           )
+<<<<<<< HEAD
         )
       ),
       by = "sample"
@@ -59,6 +68,72 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       .funs = ~ stats::relevel(factor(.x), ref = cohort_name)
     ) %>%
     dplyr::select("sample", dplyr::everything())
+=======
+        )
+      ),
+      by = "sample"
+    ) %>%
+    dplyr::mutate(
+      cohort = ifelse(is.na(.data[["pop"]]), cohort_name, "1,000 Genomes"),
+      pop = ifelse(is.na(.data[["pop"]]), cohort_name, .data[["pop"]]),
+      super_pop = ifelse(is.na(.data[["super_pop"]]), cohort_name, .data[["super_pop"]])
+    ) %>%
+    dplyr::mutate_at(
+      .vars = dplyr::vars(.data[["cohort"]], .data[["pop"]], .data[["super_pop"]]),
+      .funs = ~ stats::relevel(factor(.x), ref = cohort_name)
+    ) %>%
+    dplyr::select("sample", dplyr::everything())
+
+  p <- purrr::map(.x = c("pop" = "pop", "super_pop" = "super_pop"), .f = function(ipop) {
+    ggplot2::ggplot(
+      data = pca_gg,
+      mapping = ggplot2::aes(x = .data[["PC01"]], y = .data[["PC02"]], colour = .data[[ipop]])
+    ) +
+      ggplot2::theme_light(base_size = 12) +
+    	ggplot2::geom_hline(yintercept = 0, linetype = 1, size = 0.5, na.rm = TRUE) +
+    	ggplot2::geom_vline(xintercept = 0, linetype = 1, size = 0.5, na.rm = TRUE) +
+      ggforce::geom_mark_ellipse(mapping = ggplot2::aes(fill = .data[[ipop]]), con.cap = 0) +
+      ggplot2::geom_point(mapping = ggplot2::aes(shape = .data[[ipop]]), na.rm = TRUE) +
+    	ggplot2::scale_colour_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
+      ggplot2::scale_fill_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
+      ggplot2::scale_shape_manual(values = c(3, rep(1, length(unique(pca_gg[[ipop]]))))) +
+      ggplot2::labs(
+        shape = c("super_pop" = "Super Population", "pop" = "Population")[ipop],
+        colour = c("super_pop" = "Super Population", "pop" = "Population")[ipop],
+        fill = c("super_pop" = "Super Population", "pop" = "Population")[ipop]
+      ) +
+      ggplot2::facet_grid(cols = ggplot2::vars(.data[["cohort"]])) +
+      ggplot2::guides(
+        colour = ggplot2::guide_legend(
+          ncol = 2,
+          label.theme = ggplot2::element_text(size = 8),
+          keyheight = ggplot2::unit(9, "point")
+        )
+      )
+  })
+
+  p_zoom <- purrr::map(p, ~ .x + ggplot2::coord_cartesian(
+    xlim = range(dplyr::filter(pca_gg, .data[["cohort"]] == !!cohort_name)[["PC01"]]),
+    ylim = range(dplyr::filter(pca_gg, .data[["cohort"]] == !!cohort_name)[["PC02"]])
+  ))
+
+  p_ethni <- patchwork::wrap_plots(
+    patchwork::wrap_plots(p[["super_pop"]], p_zoom[["super_pop"]]) +
+      patchwork::plot_layout(tag_level = "new", guides = "collect"),
+    patchwork::wrap_plots(p[["pop"]], p_zoom[["pop"]]) +
+      patchwork::plot_layout(tag_level = "new", guides = "collect")
+  ) +
+    patchwork::plot_layout(nrow = 2, ncol = 1) +
+    patchwork::plot_annotation(
+      tag_levels = c("A", "1"),
+      title = "Estimated Ethnicity",
+      subtitle = paste(
+        "Based on Principal Component Analysis using",
+        scales::comma(nrow(res_pca[["projection"]])),
+        "SNPs."
+      )
+    )
+>>>>>>> 83d2ee338b41c9a6447901e9a778ac69958d699d
 
   pop_centre <- purrr::map_df(c("super_pop", "pop") , function(ipop) {
     pca_gg %>%
@@ -96,6 +171,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     dplyr::select(-dplyr::ends_with("_centre"), -.data[["pop_dist"]]) %>%
     tidyr::pivot_wider(names_from = "pop_type", values_from = "pop_closest")
 
+<<<<<<< HEAD
   p <- purrr::map(.x = c("pop" = "pop", "super_pop" = "super_pop"), .f = function(ipop) {
     ggplot2::ggplot(
       data = pca_gg,
@@ -146,6 +222,8 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       )
     )
 
+=======
+>>>>>>> 83d2ee338b41c9a6447901e9a778ac69958d699d
 
   #################
   ### Exporting ###
