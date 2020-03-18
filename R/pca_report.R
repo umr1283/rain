@@ -46,12 +46,12 @@ pca_report <- function(
   if (!inherits(design, "data.frame")) stop(message_prefix, '"design" must be a "data.frame"!')
 
   design <- design %>%
-    dplyr::mutate_at(dplyr::vars(all_of(id_var)), as.character) %>%
+    dplyr::mutate_at(dplyr::vars(tidyselect::all_of(id_var)), as.character) %>%
     dplyr::filter(.data[[id_var]] %in% !!colnames(data))
 
   keep_technical <- design %>%
     dplyr::summarise_at(
-      .vars = dplyr::vars(all_of(technical_vars)),
+      .vars = dplyr::vars(tidyselect::all_of(technical_vars)),
       .funs = ~ dplyr::n_distinct(.x) > 1 & dplyr::n_distinct(.x) < length(.x)
     ) %>%
     dplyr::select_if(~ all(isTRUE(.x)), identity) %>%
@@ -205,7 +205,7 @@ pca_report <- function(
         )
       ) %>%
       tidyr::unnest(.data[["data"]]) %>%
-      dplyr::mutate_at(dplyr::vars(all_of(ivar)), as.character) %>%
+      dplyr::mutate_at(dplyr::vars(tidyselect::all_of(ivar)), as.character) %>%
       ggplot2::ggplot(mapping = ggplot2::aes(x = .data[["X"]], y = .data[["Y"]], colour = .data[[ivar]])) +
       ggplot2::geom_hline(yintercept = 0, na.rm = TRUE) +
       ggplot2::geom_vline(xintercept = 0, na.rm = TRUE) +
