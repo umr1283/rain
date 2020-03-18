@@ -24,9 +24,10 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     col_names = FALSE
   )
 
-  res_pca <- flashpcaR::flashpca(input_plink, ndim = 10)
+  pca_ndim <- 10
+  res_pca <- flashpcaR::flashpca(input_plink, ndim = pca_ndim)
+  pca_gg <- dplyr::as_tibble(x = res_pca[["projection"]], .name_repair = ~ sprintf("PC%02d", 1:pca_ndim))
 
-  pca_gg <- dplyr::as_tibble(x = res_pca[["projection"]], .name_repair = ~ sprintf("PC%02d", .x))
 
   if (all.equal(fid_iid[[1]], fid_iid[[2]])) {
     pca_gg[["sample"]] <- fid_iid[[2]]
@@ -103,7 +104,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       ggplot2::theme_light(base_size = 12) +
     	ggplot2::geom_hline(yintercept = 0, linetype = 1, size = 0.5, na.rm = TRUE) +
     	ggplot2::geom_vline(xintercept = 0, linetype = 1, size = 0.5, na.rm = TRUE) +
-      ggforce::geom_mark_ellipse(mapping = ggplot2::aes(fill = .data[[ipop]]), con.cap = 0) +
+      ggforce::geom_mark_ellipse(mapping = ggplot2::aes(fill = .data[[ipop]]), con.cap = 0, alpha = 0.1) +
       ggplot2::geom_point(mapping = ggplot2::aes(shape = .data[[ipop]]), na.rm = TRUE) +
     	ggplot2::scale_colour_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
       ggplot2::scale_fill_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
