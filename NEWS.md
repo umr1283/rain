@@ -1,3 +1,9 @@
+# rain 0.3.3
+
+## Minor improvements and fixes
+
+* In `/R/pca_report.R`, update to `ggplot2` `v3.3.0`.
+
 # rain 0.3.2
 
 ## Minor improvements and fixes

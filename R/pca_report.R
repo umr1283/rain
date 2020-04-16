@@ -84,7 +84,7 @@ pca_report <- function(
   ) %>%
     ggplot2::ggplot(mapping = ggplot2::aes(x = .data[["x"]], y = .data[["y"]])) +
     ggplot2::geom_bar(stat = "identity", width = 1, colour = "white", fill = "#3B528BFF", na.rm = TRUE) +
-    ggplot2::scale_y_continuous(labels = scales::percent, expand = ggplot2::expand_scale(mult = c(0, 0.05))) +
+    ggplot2::scale_y_continuous(labels = scales::percent, expand = ggplot2::expansion(mult = c(0, 0.05))) +
     ggplot2::labs(y = glue::glue("Inertia (% of {n_comp} PCs)"), x = "Principal Components (PCs)")
   print(p)
   cat("\n")
