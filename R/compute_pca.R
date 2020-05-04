@@ -140,7 +140,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       title = "Estimated Ethnicity",
       subtitle = paste(
         "Based on Principal Component Analysis using",
-        scales::comma(ncol(res_pca[["projection"]])),
+        scales::comma(R.utils::countLines(paste0(input_plink, ".bim"))),
         "SNPs."
       )
     )
