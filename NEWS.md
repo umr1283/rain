@@ -1,3 +1,9 @@
+# rain 0.3.4
+
+## Minor improvements and fixes
+
+* In `R/compute_pca.R`, fix number of SNPs in ggplot legend.
+
 # rain 0.3.3
 
 ## Minor improvements and fixes
