@@ -1,39 +1,17 @@
-# rain 0.3.4
+# rain 0.4.0
 
-## Minor improvements and fixes
-
-* In `R/compute_pca.R`, use `R.utils` to count number of SNPs from `*.bim` file.
-
-# rain 0.3.4
-
-## Minor improvements and fixes
-
-* In `R/compute_pca.R`, fix number of SNPs in ggplot legend.
-
-# rain 0.3.3
-
-## Minor improvements and fixes
-
-* In `/R/pca_report.R`, update to `ggplot2` `v3.3.0`.
-
-# rain 0.3.2
-
-## Minor improvements and fixes
-
-* Use `patchwork` for ethnicity plot.
-* In `/R/compute_pca.R`, 
-    - fix a missplaced `.data` pronoun.
-    - core code rewrite.
-* In `/R/pca_report.R`, add packages prefix for `tidyselect`.
-* Remove `gcta64` from system requirements.
-* Remove dependency to `R.utils`.
-
-# rain 0.3.1
-
-## Minor improvements and fixes
-
-* Use `file.path()` instead of `paste()`.
-* Change messages prefix.
+* In `DESCRIPTION`,
+  + Use `patchwork` for ethnicity plot.
+  + Remove `gcta64` from system requirements.
+* In `R/compute_pca.R`,
+  + Use `R.utils` to count number of SNPs from `*.bim` file.
+  + Fix number of SNPs in ggplot legend.
+  + Fix a missplaced `.data` pronoun.
+  + Core code rewrite.
+  + Change messages prefix.
+* In `/R/pca_report.R`, 
+  + Add packages prefix for `tidyselect`.
+  + Update to `ggplot2` `v3.3.0`.
 
 # rain 0.3.0
 
