@@ -187,10 +187,10 @@ pca_report <- function(
         dist_centre = NULL,
         high = NULL,
         low = NULL,
-        bad_samples = factor(ifelse(.data[["bad_samples_bool"]], "BAD", "GOOD"), levels = c("BAD", "GOOD"))
+        is_outliers = factor(ifelse(.data[["bad_samples_bool"]], "Yes", "No"), levels = c("Yes", "No"))
       )
 
-    ivar <- "bad_samples"
+    ivar <- "is_outliers"
     p <- paste0("PC", 1:fig_n_comp) %>%
       utils::combn(2) %>%
       t() %>%
@@ -212,7 +212,7 @@ pca_report <- function(
       ggplot2::geom_point(shape = 4, size = 2, na.rm = TRUE) +
       ggplot2::stat_ellipse(type = "norm", na.rm = TRUE) +
       ggplot2::scale_colour_viridis_d() +
-      ggplot2::labs(x = NULL, y = NULL) +
+      ggplot2::labs(x = NULL, y = NULL, colour = "Outliers") +
       ggplot2::facet_grid(
         rows = ggplot2::vars(!!ggplot2::sym("Y.PC")),
         cols = ggplot2::vars(!!ggplot2::sym("X.PC")),
