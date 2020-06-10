@@ -1,17 +1,26 @@
+# rain 0.4.1
+
+## Minor text improvements
+
+* In `R/pca_report.R`,
+    + Change text for outliers in the last part of the PCA report.
+
 # rain 0.4.0
 
+## Minor improvements and fixes
+
 * In `DESCRIPTION`,
-  + Use `patchwork` for ethnicity plot.
-  + Remove `gcta64` from system requirements.
+    + Use `patchwork` for ethnicity plot.
+    + Remove `gcta64` from system requirements.
 * In `R/compute_pca.R`,
-  + Use `R.utils` to count number of SNPs from `*.bim` file.
-  + Fix number of SNPs in ggplot legend.
-  + Fix a missplaced `.data` pronoun.
-  + Core code rewrite.
-  + Change messages prefix.
-* In `/R/pca_report.R`, 
-  + Add packages prefix for `tidyselect`.
-  + Update to `ggplot2` `v3.3.0`.
+    + Use `R.utils` to count number of SNPs from `*.bim` file.
+    + Fix number of SNPs in ggplot legend.
+    + Fix a missplaced `.data` pronoun.
+    + Core code rewrite.
+    + Change messages prefix.
+* In `R/pca_report.R`, 
+    + Add packages prefix for `tidyselect`.
+    + Update to `ggplot2` `v3.3.0`.
 
 # rain 0.3.0
 
