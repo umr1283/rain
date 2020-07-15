@@ -38,7 +38,7 @@ format_array_chr(
 \item{n_cores}{An \code{integer}. The number of CPUs to use to estimate the ethnicity.}
 
 \item{bin_path}{A \code{list(character)}. A list giving the binary path of
-\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink1.9}.}
+\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink}.}
 }
 \description{
 format_array_chr

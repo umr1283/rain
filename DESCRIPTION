@@ -22,7 +22,10 @@ BugReports: https://github.com/mcanouil/rain/issues
 Depends: 
     R (>= 3.5.0)
 Imports:
-    ggplot2
+    data.table (>= 1.12.8),
+    flashpcaR (>= 2.1),
+    ggplot2 (>= 3.3.2),
+    gt (>= 0.2.1)
 Suggests:
     roxygen2 (>= 7.1.0)
 Remotes: 

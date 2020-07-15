@@ -35,7 +35,7 @@ format_vcf(
 \item{recode}{A \code{character}. Which VCF should be filtered and recode, either \code{"all"} or \code{"input"}.}
 
 \item{bin_path}{A \code{list(character)}. A list giving the binary path of
-\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink1.9}.}
+\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink}.}
 }
 \description{
 format_vcf

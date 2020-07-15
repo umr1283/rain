@@ -14,18 +14,24 @@
 #' @return A `data.frame`.
 #' @export
 #'
+#' @import data.table
+#' @import ggplot2
+#' @import gt
+#'
 #' @examples
 #'
-#' pca_report(
-#'   data = t(mtcars),
-#'   design = tibble::rownames_to_column(mtcars, "Sample_ID"),
-#'   id_var = "Sample_ID",
-#'   technical_vars = c("cyl", "gear", "vs"),
-#'   n_comp = 5,
-#'   fig_n_comp = 5,
-#'   outliers_threshold = 3,
-#'   title_level = 2
-#' )
+#' if (interactive()) {
+#'   pca_report(
+#'     data = t(mtcars),
+#'     design = as.data.table(mtcars, keep.rownames = "Sample_ID"),
+#'     id_var = "Sample_ID",
+#'     technical_vars = c("cyl", "gear", "vs"),
+#'     n_comp = 5,
+#'     fig_n_comp = 5,
+#'     outliers_threshold = 3,
+#'     title_level = 0
+#'   )
+#' }
 #'
 pca_report <- function(
   data,
@@ -37,6 +43,9 @@ pca_report <- function(
   outliers_threshold = 1.5,
   title_level = 3
 ) {
+  .data <- ggplot2::.data
+  `%>%` <- gt::`%>%`
+
   message_prefix <- "[rain] "
   message(message_prefix, "PCA started ...", appendLF = TRUE)
 
@@ -52,7 +61,8 @@ pca_report <- function(
   )
 
   pca_methylation <- data[rowSums(is.na(data)) == 0, ]
-  pca_phenotypes <- design[Sample_ID %in% colnames(data)]
+  design_idx <- design[[id_var]] %in% colnames(data)
+  pca_phenotypes <- data.table::as.data.table(design[design_idx, ])
 
   n_comp <- min(c(n_comp, 10, ncol(pca_methylation)))
   fig_n_comp <- min(c(n_comp, 3, ncol(pca_methylation)))
@@ -83,13 +93,18 @@ pca_report <- function(
   pca_dfxy <- merge(x = pca_dfxy, y = pca_phenotypes, by = id_var)
 
   p_inertia <- ggplot2::ggplot(
-    data = data.frame(
+    data = data.table::data.table(
       y = (pca_res$values / sum(pca_res$values)),
       x = sprintf("PC%02d", seq_along(pca_res$values))
-    ),
+    )[1:fig_n_comp],
     mapping = ggplot2::aes(
-      x = paste0(x, "<br><i style='font-size:5pt;'>(", scales::percent_format(accuracy = 0.01, suffix = " %")(y), ")</i>"),
-      y = y
+      x = paste0(
+        .data[["x"]],
+        "<br><i style='font-size:5pt;'>(",
+          scales::percent_format(accuracy = 0.01, suffix = " %")(.data[["y"]]),
+        ")</i>"
+      ),
+      y = .data[["y"]]
     )
   ) +
     ggplot2::geom_col(width = 1, colour = "white", fill = scales::viridis_pal(begin = 0.5, end = 0.5)(1), na.rm = TRUE) +
@@ -102,33 +117,42 @@ pca_report <- function(
 
   if (length(keep_technical) > 0) {
     cat(section_prefix, "## Association Tests\n\n", sep = "")
+    asso_dt <- data.table::melt(
+      data = pca_dfxy,
+      measure.vars = grep("^PC[0-9]+$", names(pca_dfxy), value = TRUE),
+      variable.name = "pc",
+      value.name = "values"
+    )
+    asso_dt <- asso_dt[asso_dt[["pc"]] %in% sprintf("PC%02d", 1:n_comp)]
+    asso_dt <- asso_dt[,
+      data.table::as.data.table(
+        stats::anova(
+          stats::lm(
+            formula = stats::as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
+            data = .SD
+          )
+        ),
+        keep.rownames = "term"
+      ),
+      by = "pc"
+    ]
     p_association <- ggplot2::ggplot(
-      data = data.table::melt(
-        data = pca_dfxy,
-        measure.vars = grep("^PC[0-9]+$", names(pca_dfxy), value = TRUE),
-        variable.name = "pc",
-        value.name = "values"
-      )[pc %in% sprintf("PC%02d", 1:n_comp)][,
-        data.table::as.data.table(
-          stats::anova(
-            stats::lm(
-              formula = stats::as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
-              data = .SD
-            )
-          ),
-          keep.rownames = "term"
-        )[term != "Residuals"],
-        by = "pc"
-      ],
-      mapping = ggplot2::aes(x = factor(pc), y = term, fill = `Pr(>F)`)
+      data = asso_dt[asso_dt[["term"]] != "Residuals"],
+      mapping = ggplot2::aes(x = factor(.data[["pc"]]), y = .data[["term"]], fill = .data[["Pr(>F)"]])
     ) +
       ggplot2::geom_tile(colour = "white", na.rm = TRUE) +
       ggtext::geom_richtext(
         mapping = ggplot2::aes(
-          label = gsub("(.*)e([-+]*)0*(.*)", "\\1 &times; 10<sup>\\2\\3</sup>", scales::scientific(`Pr(>F)`, digits = 2))
+          label = gsub(
+            pattern = "(.*)e([-+]*)0*(.*)",
+            replacement = "\\1<br>&times;<br>10<sup>\\2\\3</sup>",
+            x = scales::scientific(.data[["Pr(>F)"]], digits = 2)
+          )
         ),
         colour = "white",
-        size = 3,
+        fill = NA,
+        label.colour = NA,
+        size = 2.5,
         na.rm = TRUE
       ) +
       ggplot2::scale_fill_viridis_c(name = "P-Value", na.value = "grey85", end = 0.75, limits = c(0, 0.1)) +
@@ -185,7 +209,7 @@ pca_report <- function(
                   } else {
                     ggplot2::scale_colour_viridis_d(
                       name = NULL,
-                      begin = if (pca_dfxy[, data.table::uniqueN(.SD), .SDcols = ivar] == 2) 0.25 else 0,
+                      begin = if (data.table::uniqueN(pca_dfxy[[ivar]]) == 2) 0.25 else 0,
                       end = 0.75,
                       guide = ggplot2::guide_legend(override.aes = list(size = 4))
                     )
@@ -211,19 +235,23 @@ pca_report <- function(
 
   cat(section_prefix, "## Outliers Detection\n\n", sep = "")
   pca_dfxy[,
-    dist_centre := rowSums(sapply(.SD, function(x) as.vector(scale(x))^2)),
+    "dist_centre" := rowSums(sapply(.SD, function(x) as.vector(scale(x))^2)),
     .SDcols = sprintf("PC%02d", 1:fig_n_comp)
-  ][,
-    is_outlier := factor(
-      x = dist_centre > (
-        stats::quantile(dist_centre, 0.75, na.rm = TRUE) + outliers_threshold * stats::IQR(dist_centre, na.rm = TRUE)
-      ) |
-        dist_centre < (
-          stats::quantile(dist_centre, 0.25, na.rm = TRUE) - outliers_threshold * stats::IQR(dist_centre, na.rm = TRUE)
-        ),
-      levels = c(FALSE, TRUE),
-      labels = c("No", "Yes")
-    )
+  ]
+  pca_dfxy[,
+    "is_outlier" := lapply(.SD, function(x) {
+      factor(
+        x = x > (
+          stats::quantile(x, 0.75, na.rm = TRUE) + outliers_threshold * stats::IQR(x, na.rm = TRUE)
+        ) |
+          x < (
+            stats::quantile(x, 0.25, na.rm = TRUE) - outliers_threshold * stats::IQR(x, na.rm = TRUE)
+          ),
+        levels = c(FALSE, TRUE),
+        labels = c("No", "Yes")
+      )
+    }),
+    .SDcols = "dist_centre"
   ]
   p <- patchwork::wrap_plots(
     c(
@@ -236,8 +264,8 @@ pca_report <- function(
             mapping = ggplot2::aes(
               x = .data[[x[1]]],
               y = .data[[x[2]]],
-              colour = is_outlier,
-              shape = is_outlier
+              colour = .data[["is_outlier"]],
+              shape = .data[["is_outlier"]]
             )
           ) +
             ggplot2::geom_hline(yintercept = 0, linetype = 2, na.rm = TRUE) +
@@ -271,7 +299,11 @@ pca_report <- function(
   print(p)
 
   gt::gt(
-    data = pca_dfxy[is_outlier == "Yes", .SD, .SDcols = c(id_var, technical_vars, sprintf("PC%02d", 1:fig_n_comp))],
+    data = pca_dfxy[
+      pca_dfxy[["is_outlier"]] == "Yes",
+      .SD,
+      .SDcols = c(id_var, technical_vars, sprintf("PC%02d", 1:fig_n_comp))
+    ],
     auto_align = "center"
   ) %>%
     gt::tab_header(title = "Samples Identified As Possible Outliers") %>%
