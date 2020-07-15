@@ -19,7 +19,7 @@ estimate_ethnicity(
   vcf_half_call = "missing",
   n_cores = 6,
   bin_path = list(vcftools = "/usr/bin/vcftools", bcftools = "/usr/bin/bcftools", bgzip
-    = "/usr/bin/bgzip", tabix = "/usr/bin/tabix", plink1.9 = "/usr/bin/plink1.9")
+    = "/usr/bin/bgzip", tabix = "/usr/bin/tabix", plink = "/usr/bin/plink1.9")
 )
 }
 \arguments{
@@ -54,7 +54,7 @@ estimate_ethnicity(
 \item{n_cores}{An \code{integer}. The number of CPUs to use to estimate the ethnicity.}
 
 \item{bin_path}{A \code{list(character)}. A list giving the binary path of
-\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink1.9}.}
+\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink}.}
 }
 \value{
 A \code{data.frame}.

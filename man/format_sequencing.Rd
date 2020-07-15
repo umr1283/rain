@@ -34,7 +34,7 @@ format_sequencing(
 + 'reference'/'r': Treat the missing part as reference.}
 
 \item{bin_path}{A \code{list(character)}. A list giving the binary path of
-\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink1.9}.}
+\code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink}.}
 }
 \description{
 format_sequencing

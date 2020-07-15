@@ -40,15 +40,17 @@ The function can be used in a chunk within a Rmarkdown document/script with resu
 }
 \examples{
 
-pca_report(
-  data = t(mtcars),
-  design = tibble::rownames_to_column(mtcars, "Sample_ID"),
-  id_var = "Sample_ID",
-  technical_vars = c("cyl", "gear", "vs"),
-  n_comp = 5,
-  fig_n_comp = 5,
-  outliers_threshold = 3,
-  title_level = 2
-)
+if (interactive()) {
+  pca_report(
+    data = t(mtcars),
+    design = as.data.table(mtcars, keep.rownames = "Sample_ID"),
+    id_var = "Sample_ID",
+    technical_vars = c("cyl", "gear", "vs"),
+    n_comp = 5,
+    fig_n_comp = 5,
+    outliers_threshold = 3,
+    title_level = 0
+  )
+}
 
 }

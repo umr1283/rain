@@ -3,3 +3,6 @@
 export(compute_pca)
 export(estimate_ethnicity)
 export(pca_report)
+import(data.table)
+import(ggplot2)
+import(gt)
