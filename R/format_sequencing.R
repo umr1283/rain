@@ -33,7 +33,7 @@ format_sequencing <- function(
   system(
     intern = TRUE, wait = TRUE,
     command = paste(
-      bin_path[["plink1.9"]],
+      bin_path[["plink"]],
       "--vcf", list.files(path = output_directory, pattern = "_merged.vcf.gz$", full.names = TRUE),
       "--snps-only",
       "--maf", ref1kg_maf,
@@ -42,7 +42,7 @@ format_sequencing <- function(
       "--make-bed",
       "--double-id",
       "--vcf-half-call", paste0("'", vcf_half_call, "'"),
-      "--out", paste0(output_directory, "/all")
+      "--out", file.path(output_directory, "all")
     )
   )
 

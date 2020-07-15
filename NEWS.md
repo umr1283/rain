@@ -1,5 +1,10 @@
 # rain (development version)
 
+## Breaking CHanges
+
+* In `R/pca_report.R`,
+    + Code refactoring.
+
 # rain 0.4.1
 
 ## Minor text improvements

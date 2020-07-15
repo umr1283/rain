@@ -7,8 +7,9 @@ check_input <- function(input) {
   message_prefix <- "[rain] "
 
   name <- deparse(substitute(input))
-  is_input_good <- (length(input) == 1 && (fs::is_dir(input) | fs::is_file(input))) |
-    all(fs::is_file(input))
+  is_input_good <- (
+    length(input) == 1 && (fs::is_dir(input) | fs::is_file(input))
+  ) | all(fs::is_file(input))
 
   if (!is_input_good) {
     stop(
@@ -24,7 +25,7 @@ check_input <- function(input) {
   if (!all(grepl(".vcf.gz$", list_input) & fs::is_file(list_input))) {
     stop(message_prefix, 'VCF files must be compressed using bgzip!')
   }
-  if (length(list_input)==0) {
+  if (length(list_input) == 0) {
     stop(
       message_prefix, 'A valid "', name, '" must be provided, ',
       'either a directory (with VCF files) or a vcf file!'

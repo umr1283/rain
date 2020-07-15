@@ -65,7 +65,7 @@ format_array_chr <- function(
       "--file-list", temp_file,
       "--allow-overlaps",
       "--output-type z",
-      "--output", paste0(output_directory, "/all.vcf.gz")
+      "--output", file.path(output_directory, "all.vcf.gz")
     )
   )
   unlink(x = temp_file, recursive = TRUE)
@@ -74,15 +74,15 @@ format_array_chr <- function(
   system(
     intern = TRUE, wait = TRUE,
     command = paste(
-      bin_path[["plink1.9"]],
-      "--vcf", paste0(output_directory, "/all.vcf.gz"),
+      bin_path[["plink"]],
+      "--vcf", file.path(output_directory, "all.vcf.gz"),
       "--snps-only",
       "--maf", ref1kg_maf,
       "--hwe 0.0001",
       "--geno 0.1",
       "--make-bed",
       "--double-id",
-      "--out", paste0(output_directory, "/all")
+      "--out", file.path(output_directory, "all")
     )
   )
 

@@ -15,21 +15,21 @@ format_vcf <- function(
   recode,
   bin_path
 ) {
-  temp_directory <- paste0(tempdir(), "/chr", ichr)
+  temp_directory <- paste0(file.path(tempdir(), "chr"), ichr)
   invisible(sapply(
-    X = paste0(temp_directory, c("/study", "/ref", "/isec")),
+    X = file.path(temp_directory, c("study", "ref", "isec")),
     FUN = dir.create,
     recursive = TRUE, showWarnings = FALSE, mode = '0777'
   ))
-  output_study_temp <- paste0(temp_directory, "/study/filtered_", basename(input_vcfs))
-  output_study_final <- paste0(temp_directory, "/study/final_", basename(input_vcfs))
-  output_ref <- paste0(temp_directory, "/ref/filtered_", basename(ref1kg_vcfs))
+  output_study_temp <- file.path(temp_directory, "study", paste0("filtered_", basename(input_vcfs)))
+  output_study_final <- file.path(temp_directory, "study", paste0("final_", basename(input_vcfs)))
+  output_ref <- file.path(temp_directory, "ref", paste0("filtered_", basename(input_vcfs)))
   if (is.character(ichr)) {
-    output_merge_temp <- paste0(temp_directory, "/chr", ichr, "_merged.vcf.gz")
-    output_merge <- paste0(output_directory, "/chr", ichr, "_merged.vcf.gz")
+    output_merge_temp <- file.path(temp_directory, paste0("chr", ichr, "_merged.vcf.gz"))
+    output_merge <- file.path(output_directory, paste0("chr", ichr, "_merged.vcf.gz"))
   } else {
-    output_merge_temp <- paste0(temp_directory, sprintf("/chr%02d_merged.vcf.gz", ichr))
-    output_merge <- paste0(output_directory, sprintf("/chr%02d_merged.vcf.gz", ichr))
+    output_merge_temp <- file.path(temp_directory, sprintf("chr%02d_merged.vcf.gz", ichr))
+    output_merge <- file.path(output_directory, sprintf("chr%02d_merged.vcf.gz", ichr))
   }
 
   switch(
@@ -53,7 +53,7 @@ format_vcf <- function(
   )
 
   chr_conv_file <- tempfile(fileext = ".conv")
-  utils::write.table(
+  data.table::fwrite(
     x = rbind(
       matrix(paste0(c("chr", ""), rep(c(1:22, "X", "Y"), each = 2)), byrow = TRUE, ncol = 2),
       matrix(rep(c(1:22, "X", "Y"), each = 2), byrow = TRUE, ncol = 2)

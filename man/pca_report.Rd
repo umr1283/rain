@@ -9,15 +9,14 @@ pca_report(
   design,
   id_var = "Sample_ID",
   technical_vars,
-  n_comp = 5,
+  n_comp = 10,
   fig_n_comp = n_comp,
-  outliers_component = 1:2,
-  outliers_threshold = 3,
-  title_level = 2
+  outliers_threshold = 1.5,
+  title_level = 3
 )
 }
 \arguments{
-\item{data}{A \code{vector} or \code{data.frame}. The data on which the PCA has to be performed.}
+\item{data}{A \code{vector} or \code{data.frame}. The numeric data on which the PCA has to be performed.}
 
 \item{design}{A \code{data.frame}. Additional variables to be used with factorial planes.}
 
@@ -28,8 +27,6 @@ pca_report(
 \item{n_comp}{A \code{numeric}. The number of principal components to be computed.}
 
 \item{fig_n_comp}{A \code{numeric}. The number of principal components to be used for figures.}
-
-\item{outliers_component}{A \code{logical}. The principal components to be used to outliers detection.}
 
 \item{outliers_threshold}{A \code{numeric}. The threshold to define outliers.}
 
@@ -50,7 +47,6 @@ pca_report(
   technical_vars = c("cyl", "gear", "vs"),
   n_comp = 5,
   fig_n_comp = 5,
-  outliers_component = 1:2,
   outliers_threshold = 3,
   title_level = 2
 )

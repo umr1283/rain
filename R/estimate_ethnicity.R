@@ -18,7 +18,7 @@
 #'     + 'reference'/'r': Treat the missing part as reference.
 #' @param n_cores An `integer`. The number of CPUs to use to estimate the ethnicity.
 #' @param bin_path A `list(character)`. A list giving the binary path of
-#'   `vcftools`, `bcftools`, `bgzip`, `tabix` and `plink1.9`.
+#'   `vcftools`, `bcftools`, `bgzip`, `tabix` and `plink`.
 #'
 #' @return A `data.frame`.
 #' @export
@@ -41,7 +41,7 @@ estimate_ethnicity <- function(
     bcftools = "/usr/bin/bcftools",
     bgzip = "/usr/bin/bgzip",
     tabix = "/usr/bin/tabix",
-    plink1.9 = "/usr/bin/plink1.9"
+    plink = "/usr/bin/plink1.9"
   )
 ) {
   message_prefix <- "[rain] "
@@ -55,26 +55,24 @@ estimate_ethnicity <- function(
   list_input <- check_input(input = input_vcfs)
   list_ref <- check_input(input = ref1kg_vcfs)
 
-  if (!input_type%in%c("array", "sequencing")) {
+  if (!input_type %in% c("array", "sequencing")) {
     stop(message_prefix, '"input_type" must be either "array" or "sequencing"!')
   }
 
-  if (input_type=="sequencing" & length(list_ref)!=1) {
+  if (input_type %in% "sequencing" & length(list_ref) != 1) {
     stop(
       message_prefix, 'A unique vcf file ("ref1kg_vcfs") must be provided ',
       'with `input_type = "sequencing"`!'
     )
   }
-  if (input_type=="array" & !splitted_by_chr & length(list_ref)!=1) {
+  if (input_type %in% "array" & !splitted_by_chr & length(list_ref) != 1) {
     stop(
       message_prefix, 'A unique vcf file ("ref1kg_vcfs") must be provided ',
       'with `input_type = "array"` & `splitted_by_chr = FALSE`!'
     )
   }
 
-  if (input_type=="sequencing") {
-    quality_tag <- NULL
-  }
+  if (input_type %in% "sequencing") quality_tag <- NULL
 
   ######################
   ### Formating VCFs ###
@@ -129,7 +127,7 @@ estimate_ethnicity <- function(
   ######################
   compute_pca(
     cohort_name = cohort_name,
-    input_plink = paste0(output_directory, "/all"),
+    input_plink = file.path(output_directory, "all"),
     output_directory = output_directory,
     ref1kg_population = ref1kg_population
   )
