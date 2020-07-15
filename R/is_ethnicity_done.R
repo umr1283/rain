@@ -6,7 +6,7 @@
 is_ethnicity_done <- function(output_directory) {
   message_prefix <- "[rain] "
 
-  plink_files_exists <- all(file.exists(paste0(output_directory, "/all", c(".bim", ".fam", ".bed"))))
+  plink_files_exists <- all(file.exists(file.path(output_directory, paste0("all", c(".bim", ".fam", ".bed")))))
 
   if (plink_files_exists & interactive()) {
     message(paste0(
@@ -16,9 +16,7 @@ is_ethnicity_done <- function(output_directory) {
       "  (n) to cancel and call `compute_pca`.\n",
       "  Please choose (y) or (n): "
     ))
-    answer <- readline(
-      prompt = ""
-    )
+    answer <- readline(prompt = "")
 
     out <- grepl("y", answer, ignore.case = TRUE)
   } else {

@@ -5,8 +5,8 @@
 #' @keywords internal
 merge_vcf <- function(input_vcfs, bin_path) {
   if (length(input_vcfs) > 1) {
-    output_temp <- paste0(tempdir(), "/samples_merged.vcf.gz")
-    vcf_list <- paste0(tempdir(), "/samples_merged.txt")
+    output_temp <- file.path(tempdir(), "samples_merged.vcf.gz")
+    vcf_list <- file.path(tempdir(), "samples_merged.txt")
     cat(input_vcfs, sep = "\n", file = vcf_list)
     system(
       intern = TRUE, wait = TRUE,

@@ -29,7 +29,7 @@ format_array_all <- function(
   system(
     intern = TRUE, wait = TRUE,
     command = paste(
-      bin_path[["plink1.9"]],
+      bin_path[["plink"]],
       "--vcf", list.files(path = output_directory, pattern = "_merged.vcf.gz$", full.names = TRUE),
       "--snps-only",
       "--maf", ref1kg_maf,
@@ -37,7 +37,7 @@ format_array_all <- function(
       "--geno 0.1",
       "--make-bed",
       "--double-id",
-      "--out", paste0(output_directory, "/all")
+      "--out", file.path(output_directory, "all")
     )
   )
 

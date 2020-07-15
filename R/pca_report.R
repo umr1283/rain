@@ -2,13 +2,12 @@
 #'
 #' The function can be used in a chunk within a Rmarkdown document/script with results="asis" to render the report.
 #'
-#' @param data A `vector` or `data.frame`. The data on which the PCA has to be performed.
+#' @param data A `vector` or `data.frame`. The numeric data on which the PCA has to be performed.
 #' @param design A `data.frame`. Additional variables to be used with factorial planes.
 #' @param id_var A `character`. The identifier column used to merge the data.
 #' @param technical_vars A `vector(character)`. Variables from design to be used with factorial planes.
 #' @param n_comp A `numeric`. The number of principal components to be computed.
 #' @param fig_n_comp A `numeric`. The number of principal components to be used for figures.
-#' @param outliers_component A `logical`. The principal components to be used to outliers detection.
 #' @param outliers_threshold A `numeric`. The threshold to define outliers.
 #' @param title_level A `numeric`. The markdown title level, *i.e.*, the number of `#` preceding the section.
 #'
@@ -24,7 +23,6 @@
 #'   technical_vars = c("cyl", "gear", "vs"),
 #'   n_comp = 5,
 #'   fig_n_comp = 5,
-#'   outliers_component = 1:2,
 #'   outliers_threshold = 3,
 #'   title_level = 2
 #' )
@@ -34,198 +32,255 @@ pca_report <- function(
   design,
   id_var = "Sample_ID",
   technical_vars,
-  n_comp = 5,
+  n_comp = 10,
   fig_n_comp = n_comp,
-  outliers_component = 1:2,
-  outliers_threshold = 3,
-  title_level = 2
+  outliers_threshold = 1.5,
+  title_level = 3
 ) {
   message_prefix <- "[rain] "
-  message(message_prefix, "PCA started ...")
+  message(message_prefix, "PCA started ...", appendLF = TRUE)
 
-  if (!inherits(design, "data.frame")) stop(message_prefix, '"design" must be a "data.frame"!')
+  section_prefix <- paste(c("\n", rep("#", title_level)), collapse = "")
 
-  design <- design %>%
-    dplyr::mutate_at(dplyr::vars(tidyselect::all_of(id_var)), as.character) %>%
-    dplyr::filter(.data[[id_var]] %in% !!colnames(data))
+  pca_theme <- ggplot2::theme(
+    plot.title.position = "plot",
+    plot.caption.position = "plot",
+    plot.title = ggtext::element_markdown(),
+    plot.subtitle = ggtext::element_markdown(face = "italic", size = ggplot2::rel(0.8)),
+    plot.caption = ggtext::element_markdown(face = "italic", size = ggplot2::rel(0.5)),
+    axis.text.x = ggtext::element_markdown()
+  )
 
-  keep_technical <- design %>%
-    dplyr::summarise_at(
-      .vars = dplyr::vars(tidyselect::all_of(technical_vars)),
-      .funs = ~ dplyr::n_distinct(.x) > 1 & dplyr::n_distinct(.x) < length(.x)
-    ) %>%
-    dplyr::select_if(~ all(isTRUE(.x)), identity) %>%
-    colnames()
+  pca_methylation <- data[rowSums(is.na(data)) == 0, ]
+  pca_phenotypes <- design[Sample_ID %in% colnames(data)]
+
+  n_comp <- min(c(n_comp, 10, ncol(pca_methylation)))
+  fig_n_comp <- min(c(n_comp, 3, ncol(pca_methylation)))
+
+  keep_technical <- names(which(sapply(pca_phenotypes[,
+    lapply(.SD, function(x) data.table::uniqueN(x) > 1 & data.table::uniqueN(x) < length(x)),
+    .SDcols = technical_vars
+  ], isTRUE)))
 
   variables_excluded <- setdiff(technical_vars, keep_technical)
-  if (length(variables_excluded)!=0) {
-    message(message_prefix,
-      "The following variables have been excluded (null variances or confounding with samples): ",
-      glue::glue_collapse(variables_excluded, sep = ", ", last = " and ")
+  if (length(variables_excluded) != 0) {
+    cat(
+      "The following variables have been excluded (null variances or confounding with samples):\n",
+      paste("+", variables_excluded),
+      "\n",
+      sep = "\n"
     )
   }
 
-  pca_res <- flashpcaR::flashpca(
-    X = t(as.matrix(data)),
-    stand = "sd",
-    ndim = n_comp
+  pca_res <- flashpcaR::flashpca(X = t(pca_methylation), stand = "sd", ndim = n_comp)
+
+  pca_dfxy <- data.table::as.data.table(pca_res[["projection"]], keep.rownames = id_var)
+  data.table::setnames(
+    x = pca_dfxy,
+    old = setdiff(names(pca_dfxy), id_var),
+    new = sprintf("PC%02d", as.numeric(gsub("V", "", setdiff(names(pca_dfxy), id_var))))
   )
+  pca_dfxy <- merge(x = pca_dfxy, y = pca_phenotypes, by = id_var)
 
-  pca_dfxy <- pca_res[["projection"]] %>%
-    tibble::as_tibble(.name_repair = ~ paste0("PC", seq_len(length(.x)))) %>%
-    dplyr::mutate(!!id_var := as.character(colnames(data))) %>%
-    dplyr::right_join(y = design, by = id_var)
+  p_inertia <- ggplot2::ggplot(
+    data = data.frame(
+      y = (pca_res$values / sum(pca_res$values)),
+      x = sprintf("PC%02d", seq_along(pca_res$values))
+    ),
+    mapping = ggplot2::aes(
+      x = paste0(x, "<br><i style='font-size:5pt;'>(", scales::percent_format(accuracy = 0.01, suffix = " %")(y), ")</i>"),
+      y = y
+    )
+  ) +
+    ggplot2::geom_col(width = 1, colour = "white", fill = scales::viridis_pal(begin = 0.5, end = 0.5)(1), na.rm = TRUE) +
+    ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 0.1, suffix = " %"), expand = ggplot2::expansion(mult = c(0, 0.05))) +
+    ggplot2::labs(
+      x = "Principal Components",
+      y = "Contribution"
+    ) +
+    pca_theme
 
-  cat(paste0("\n", paste(rep("#", title_level), collapse = ""), " PCA inertia contribution {-}\n"))
-  p <- tibble::tibble(
-    y = (pca_res$values / sum(pca_res$values)),
-    x = sprintf("PC%02d", seq_along(pca_res$values)),
-    cumsum = cumsum(.data[["y"]])
-  ) %>%
-    ggplot2::ggplot(mapping = ggplot2::aes(x = .data[["x"]], y = .data[["y"]])) +
-    ggplot2::geom_bar(stat = "identity", width = 1, colour = "white", fill = "#3B528BFF", na.rm = TRUE) +
-    ggplot2::scale_y_continuous(labels = scales::percent, expand = ggplot2::expansion(mult = c(0, 0.05))) +
-    ggplot2::labs(y = glue::glue("Inertia (% of {n_comp} PCs)"), x = "Principal Components (PCs)")
-  print(p)
-  cat("\n")
-
-  if (length(keep_technical)>0) {
-    cat(paste0("\n", paste(rep("#", title_level), collapse = ""), " PCA factorial planes {- .tabset}\n"))
-    for (ivar in keep_technical) {
-      cat(paste0("\n", paste(rep("#", title_level + 1), collapse = ""), " ", ivar, " {-}\n"))
-      p <- paste0("PC", 1:fig_n_comp) %>%
-        utils::combn(2) %>%
-        t() %>%
-        as.data.frame(stringsAsFactors = FALSE) %>%
-        stats::setNames(c("X.PC", "Y.PC")) %>%
-        tibble::as_tibble() %>%
-        dplyr::mutate(
-          data = purrr::map2(
-            .x = .data[["X.PC"]],
-            .y = .data[["Y.PC"]],
-            .f = ~ stats::setNames(pca_dfxy[, c(!!ivar, .x, .y)], c(!!ivar, "X", "Y"))
+  if (length(keep_technical) > 0) {
+    cat(section_prefix, "## Association Tests\n\n", sep = "")
+    p_association <- ggplot2::ggplot(
+      data = data.table::melt(
+        data = pca_dfxy,
+        measure.vars = grep("^PC[0-9]+$", names(pca_dfxy), value = TRUE),
+        variable.name = "pc",
+        value.name = "values"
+      )[pc %in% sprintf("PC%02d", 1:n_comp)][,
+        data.table::as.data.table(
+          stats::anova(
+            stats::lm(
+              formula = stats::as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
+              data = .SD
+            )
+          ),
+          keep.rownames = "term"
+        )[term != "Residuals"],
+        by = "pc"
+      ],
+      mapping = ggplot2::aes(x = factor(pc), y = term, fill = `Pr(>F)`)
+    ) +
+      ggplot2::geom_tile(colour = "white", na.rm = TRUE) +
+      ggtext::geom_richtext(
+        mapping = ggplot2::aes(
+          label = gsub("(.*)e([-+]*)0*(.*)", "\\1 &times; 10<sup>\\2\\3</sup>", scales::scientific(`Pr(>F)`, digits = 2))
+        ),
+        colour = "white",
+        size = 3,
+        na.rm = TRUE
+      ) +
+      ggplot2::scale_fill_viridis_c(name = "P-Value", na.value = "grey85", end = 0.75, limits = c(0, 0.1)) +
+      ggplot2::theme(panel.grid = ggplot2::element_blank()) +
+      ggplot2::scale_x_discrete(
+        expand = c(0, 0),
+        labels = function(x) {
+          paste0(
+            x, "<br><i style='font-size:5pt;'>(",
+            scales::percent_format(accuracy = 0.01, suffix = " %")((pca_res$values / sum(pca_res$values))[as.numeric(gsub("PC", "", x))]),
+            ")</i>"
           )
-        ) %>%
-        tidyr::unnest(.data[["data"]]) %>%
-        dplyr::mutate_at(dplyr::vars(ivar), as.character) %>%
-        ggplot2::ggplot(mapping = ggplot2::aes(x = .data[["X"]], y = .data[["Y"]], colour = .data[[ivar]])) +
-        ggplot2::geom_hline(yintercept = 0, na.rm = TRUE) +
-        ggplot2::geom_vline(xintercept = 0, na.rm = TRUE) +
-        ggplot2::geom_point(shape = 4, size = 2, na.rm = TRUE) +
-        ggplot2::stat_ellipse(type = "norm", na.rm = TRUE) +
-        ggplot2::scale_colour_viridis_d() +
-        ggplot2::labs(x = NULL, y = NULL) +
-        ggplot2::facet_grid(
-          rows = ggplot2::vars(!!ggplot2::sym("Y.PC")),
-          cols = ggplot2::vars(!!ggplot2::sym("X.PC")),
-          scales = "free"
-        ) +
-        ggplot2::guides(colour = ifelse(dplyr::n_distinct(pca_dfxy[[ivar]]) <= 12, "legend", "none"))+
-        ggplot2::labs(colour = ivar)
+        }
+      ) +
+      ggplot2::scale_y_discrete(expand = c(0, 0)) +
+      ggplot2::labs(
+        x = "Principal Components",
+        y = "Variables",
+        title = "Association Tests Between Variables And Principal Components",
+        caption = paste0(
+          "Contribution computed using ", n_comp," principal components.<br>",
+          "Variables are tested against principal components using ANOVA."
+        )
+      ) +
+      pca_theme
+
+    print(p_association)
+    cat("\n")
+
+    cat(section_prefix, "## Factorial Planes\n\n", sep = "")
+    for (ivar in keep_technical) {
+      cat(section_prefix, "### `", ivar, "`\n\n", sep = "")
+      p <- patchwork::wrap_plots(
+        c(
+          apply(
+            X = utils::combn(sprintf("PC%02d", 1:fig_n_comp), 2),
+            MARGIN = 2,
+            FUN = function(x) {
+              ggplot2::ggplot(
+                data = pca_dfxy[, .SD, .SDcols = c(ivar, x)],
+                mapping = ggplot2::aes(x = .data[[x[1]]], y = .data[[x[2]]], colour = .data[[ivar]])
+              ) +
+                ggplot2::geom_hline(yintercept = 0, linetype = 2, na.rm = TRUE) +
+                ggplot2::geom_vline(xintercept = 0, linetype = 2, na.rm = TRUE) +
+                ggplot2::geom_point(na.rm = TRUE) +
+                ggplot2::stat_ellipse(type = "norm", na.rm = TRUE, show.legend = FALSE) +
+                {
+                  if (is.numeric(pca_dfxy[[ivar]])) {
+                    ggplot2::scale_colour_viridis_c(
+                      name = NULL,
+                      begin = 0,
+                      end = 0.75
+                    )
+                  } else {
+                    ggplot2::scale_colour_viridis_d(
+                      name = NULL,
+                      begin = if (pca_dfxy[, data.table::uniqueN(.SD), .SDcols = ivar] == 2) 0.25 else 0,
+                      end = 0.75,
+                      guide = ggplot2::guide_legend(override.aes = list(size = 4))
+                    )
+                  }
+                }
+            }
+          ),
+          list(p_inertia)
+        ),
+        guides = "collect"
+      ) +
+        patchwork::plot_annotation(
+          title = paste0("Structure Detection For: '<i>", ivar, "</i>'"),
+          caption = paste0("Contribution computed using ", n_comp," principal components."),
+          tag_levels = "A",
+          theme = pca_theme
+        )
+
       print(p)
       cat("\n")
     }
-
-    cat(paste0("\n", paste(rep("#", title_level), collapse = ""), " PCA association {-}\n"))
-    p <- pca_dfxy %>%
-      tidyr:: pivot_longer(names_to = "PC", values_to = "Values", cols = dplyr::num_range("PC", 1:n_comp)) %>%
-      dplyr::filter(.data[["PC"]] %in% paste0("PC", 1:fig_n_comp)) %>%
-      dplyr::group_by(.data[["PC"]]) %>%
-      tidyr::nest() %>%
-      dplyr::mutate(
-        lm = purrr::map(.data[["data"]], function(data) {
-          stats::lm(
-            stats::as.formula(paste0("Values ~ ", paste(keep_technical, collapse = " + "))),
-            data = data
-          ) %>%
-            stats::anova() %>%
-            tibble::rownames_to_column(var = "term") %>%
-            dplyr::filter(.data[["term"]] != "Residuals") %>%
-            dplyr::mutate(term = gsub("factor\\((.*)\\)", "\\1", .data[["term"]]))
-        })
-      ) %>%
-      dplyr::ungroup() %>%
-      dplyr::select(.data[["PC"]], .data[["lm"]]) %>%
-      tidyr::unnest(.data[["lm"]]) %>%
-      ggplot2::ggplot(
-        mapping = ggplot2::aes(
-          x = factor(.data[["PC"]]),
-          y = .data[["term"]],
-          fill = .data[["Pr(>F)"]]
-        )
-      ) +
-        ggplot2::geom_tile(colour = "white", na.rm = TRUE) +
-        ggplot2::geom_text(
-          mapping = ggplot2::aes(label = scales::scientific(.data[["Pr(>F)"]], digits = 2)),
-          colour = "white",
-          size = 3,
-          na.rm = TRUE
-        ) +
-        ggplot2::scale_fill_viridis_c(name = "P-Value", na.value = "grey85", limits = c(0, 0.1)) +
-        ggplot2::theme(panel.grid = ggplot2::element_blank()) +
-        ggplot2::scale_x_discrete(expand = c(0, 0)) +
-        ggplot2::scale_y_discrete(expand = c(0, 0)) +
-        ggplot2::labs(x = "PCA Components", y = NULL)
-    print(p)
-    cat("\n")
   }
 
+  cat(section_prefix, "## Outliers Detection\n\n", sep = "")
+  pca_dfxy[,
+    dist_centre := rowSums(sapply(.SD, function(x) as.vector(scale(x))^2)),
+    .SDcols = sprintf("PC%02d", 1:fig_n_comp)
+  ][,
+    is_outlier := factor(
+      x = dist_centre > (
+        stats::quantile(dist_centre, 0.75, na.rm = TRUE) + outliers_threshold * stats::IQR(dist_centre, na.rm = TRUE)
+      ) |
+        dist_centre < (
+          stats::quantile(dist_centre, 0.25, na.rm = TRUE) - outliers_threshold * stats::IQR(dist_centre, na.rm = TRUE)
+        ),
+      levels = c(FALSE, TRUE),
+      labels = c("No", "Yes")
+    )
+  ]
+  p <- patchwork::wrap_plots(
+    c(
+      apply(
+        X = utils::combn(sprintf("PC%02d", 1:fig_n_comp), 2),
+        MARGIN = 2,
+        FUN = function(x) {
+          ggplot2::ggplot(
+            data = pca_dfxy[, .SD, .SDcols = c("is_outlier", x)],
+            mapping = ggplot2::aes(
+              x = .data[[x[1]]],
+              y = .data[[x[2]]],
+              colour = is_outlier,
+              shape = is_outlier
+            )
+          ) +
+            ggplot2::geom_hline(yintercept = 0, linetype = 2, na.rm = TRUE) +
+            ggplot2::geom_vline(xintercept = 0, linetype = 2, na.rm = TRUE) +
+            ggplot2::geom_point(na.rm = TRUE) +
+            ggplot2::stat_ellipse(type = "norm", na.rm = TRUE, show.legend = FALSE) +
+            ggplot2::scale_colour_viridis_d(
+              name = "Outlier",
+              begin = 0.25,
+              end = 0.75,
+              guide = ggplot2::guide_legend(override.aes = list(size = 4))
+            ) +
+            ggplot2::scale_shape_manual(name = "Outlier", values = c(1, 4))
+        }
+      ),
+      list(p_inertia)
+    ),
+    guides = "collect"
+  ) +
+    patchwork::plot_annotation(
+      title = "Outliers Detection In Factorial Planes",
+      caption = paste0(
+        "Outliers defined for a Euclidean distance from cohort centroid (based on the principal components up to ", fig_n_comp, "):<br>",
+        "&bull; higher than ", outliers_threshold, " times the interquartile range above the 75<sup>th</sup> percentile.<br>",
+        "&bull; lower than ", outliers_threshold, " times the interquartile range below the 25<sup>th</sup> percentile.<br>",
+        "Contribution computed using ", n_comp," principal components."
+      ),
+      tag_levels = "A",
+      theme = pca_theme
+    )
+  print(p)
 
-  if (!is.null(outliers_component)) {
-    cat(paste0("\n", paste(rep("#", title_level), collapse = ""), " PCA Outliers {-}\n"))
-    pcs <- paste0("PC", outliers_component)
-    pca_dfxy <- pca_dfxy %>%
-      dplyr::mutate(
-        dist_centre = sqrt(as.vector(scale(.data[[pcs[1]]]))^2 + as.vector(scale(.data[[pcs[2]]]))^2),
-        high = .data[["dist_centre"]] >=
-          (stats::median(.data[["dist_centre"]], na.rm = TRUE) +
-            !!outliers_threshold * stats::IQR(.data[["dist_centre"]], na.rm = TRUE)),
-        low = .data[["dist_centre"]] <=
-          (stats::median(.data[["dist_centre"]], na.rm = TRUE) -
-             !!outliers_threshold * stats::IQR(.data[["dist_centre"]], na.rm = TRUE)),
-        bad_samples_bool = .data[["high"]] | .data[["low"]],
-        dist_centre = NULL,
-        high = NULL,
-        low = NULL,
-        is_outliers = factor(ifelse(.data[["bad_samples_bool"]], "Yes", "No"), levels = c("Yes", "No"))
-      )
+  gt::gt(
+    data = pca_dfxy[is_outlier == "Yes", .SD, .SDcols = c(id_var, technical_vars, sprintf("PC%02d", 1:fig_n_comp))],
+    auto_align = "center"
+  ) %>%
+    gt::tab_header(title = "Samples Identified As Possible Outliers") %>%
+    gt::fmt_number(columns = sprintf("PC%02d", 1:fig_n_comp), decimals = 2) %>%
+    gt::opt_row_striping() %>%
+    gt::opt_all_caps() %>%
+    print()
 
-    ivar <- "is_outliers"
-    p <- paste0("PC", 1:fig_n_comp) %>%
-      utils::combn(2) %>%
-      t() %>%
-      as.data.frame(stringsAsFactors = FALSE) %>%
-      tibble::as_tibble() %>%
-      stats::setNames(c("X.PC", "Y.PC")) %>%
-      dplyr::mutate(
-        data = purrr::map2(
-          .x = .data[["X.PC"]],
-          .y = .data[["Y.PC"]],
-          .f = ~ stats::setNames(pca_dfxy[, c(!!ivar, .x, .y)], c(!!ivar, "X", "Y"))
-        )
-      ) %>%
-      tidyr::unnest(.data[["data"]]) %>%
-      dplyr::mutate_at(dplyr::vars(tidyselect::all_of(ivar)), as.character) %>%
-      ggplot2::ggplot(mapping = ggplot2::aes(x = .data[["X"]], y = .data[["Y"]], colour = .data[[ivar]])) +
-      ggplot2::geom_hline(yintercept = 0, na.rm = TRUE) +
-      ggplot2::geom_vline(xintercept = 0, na.rm = TRUE) +
-      ggplot2::geom_point(shape = 4, size = 2, na.rm = TRUE) +
-      ggplot2::stat_ellipse(type = "norm", na.rm = TRUE) +
-      ggplot2::scale_colour_viridis_d() +
-      ggplot2::labs(x = NULL, y = NULL, colour = "Outliers") +
-      ggplot2::facet_grid(
-        rows = ggplot2::vars(!!ggplot2::sym("Y.PC")),
-        cols = ggplot2::vars(!!ggplot2::sym("X.PC")),
-        scales = "free"
-      ) +
-      ggplot2::guides(colour = ifelse(dplyr::n_distinct(pca_dfxy[[ivar]]) <= 12, "legend", "none")) +
-      ggplot2::labs(colour = ivar)
-    print(p)
-    cat("\n")
-
-  }
-
-  message(message_prefix, "PCA ended.")
+  message(message_prefix, "PCA ended.", appendLF = TRUE)
 
   invisible(pca_dfxy)
 }
