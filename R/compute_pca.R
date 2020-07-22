@@ -25,16 +25,22 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
   )
 
   pca_ndim <- 10
-  res_pca <- flashpcaR::flashpca(input_plink, ndim = pca_ndim)
-  pca_gg <- dplyr::as_tibble(x = res_pca[["projection"]], .name_repair = ~ sprintf("PC%02d", 1:pca_ndim))
+
+  pca_res <- flashpcaR::flashpca(input_plink, ndim = pca_ndim)
+  pca_dfxy <- data.table::as.data.table(pca_res[["projection"]])
+  data.table::setnames(
+    x = pca_dfxy,
+    old = setdiff(names(pca_dfxy), id_var),
+    new = sprintf("PC%02d", as.numeric(gsub("V", "", setdiff(names(pca_dfxy), id_var))))
+  )
 
   if (all.equal(fid_iid[[1]], fid_iid[[2]])) {
-    pca_gg[["sample"]] <- fid_iid[[2]]
+    pca_dfxy[["sample"]] <- fid_iid[[2]]
   } else {
-    pca_gg[["sample"]] <- paste(fid_iid[[1]], fid_iid[[2]], sep = "/")
+    pca_dfxy[["sample"]] <- paste(fid_iid[[1]], fid_iid[[2]], sep = "/")
   }
 
-  pca_gg <- pca_gg %>%
+  pca_dfxy <- pca_dfxy %>%
     dplyr::left_join(
       y = suppressWarnings(
         readr::read_tsv(
@@ -60,7 +66,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     dplyr::select("sample", dplyr::everything())
 
   pop_centre <- purrr::map_df(c("super_pop", "pop") , function(ipop) {
-    pca_gg %>%
+    pca_dfxy %>%
       dplyr::filter(.data[["cohort"]] != !!cohort_name) %>%
       dplyr::select(-"cohort") %>%
       dplyr::group_by(.data[[ipop]]) %>%
@@ -73,7 +79,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       dplyr::mutate_if(.predicate = is.factor, .funs = as.character)
   })
 
-  pca_gg_pred_best <- pca_gg %>%
+  pca_gg_pred_best <- pca_dfxy %>%
     dplyr::select(-c(.data[["pop"]], .data[["super_pop"]])) %>%
     dplyr::filter(.data[["cohort"]] == !!cohort_name) %>%
     dplyr::mutate(pop_centre = list(pop_centre)) %>%
@@ -97,7 +103,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
 
   p <- purrr::map(.x = c("pop" = "pop", "super_pop" = "super_pop"), .f = function(ipop) {
     ggplot2::ggplot(
-      data = pca_gg,
+      data = pca_dfxy,
       mapping = ggplot2::aes(x = .data[["PC01"]], y = .data[["PC02"]], colour = .data[[ipop]])
     ) +
       ggplot2::theme_light(base_size = 12) +
@@ -107,7 +113,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       ggplot2::geom_point(mapping = ggplot2::aes(shape = .data[[ipop]]), na.rm = TRUE) +
     	ggplot2::scale_colour_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
       ggplot2::scale_fill_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
-      ggplot2::scale_shape_manual(values = c(3, rep(1, length(unique(pca_gg[[ipop]]))))) +
+      ggplot2::scale_shape_manual(values = c(3, rep(1, length(unique(pca_dfxy[[ipop]]))))) +
       ggplot2::labs(
         shape = c("super_pop" = "Super Population", "pop" = "Population")[ipop],
         colour = c("super_pop" = "Super Population", "pop" = "Population")[ipop],
@@ -124,8 +130,8 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
   })
 
   p_zoom <- purrr::map(p, ~ .x + ggplot2::coord_cartesian(
-    xlim = range(dplyr::filter(pca_gg, .data[["cohort"]] == !!cohort_name)[["PC01"]]),
-    ylim = range(dplyr::filter(pca_gg, .data[["cohort"]] == !!cohort_name)[["PC02"]])
+    xlim = range(dplyr::filter(pca_dfxy, .data[["cohort"]] == !!cohort_name)[["PC01"]]),
+    ylim = range(dplyr::filter(pca_dfxy, .data[["cohort"]] == !!cohort_name)[["PC02"]])
   ))
 
   p_ethni <- patchwork::wrap_plots(
