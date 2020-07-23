@@ -1,4 +1,4 @@
-# rain (development version)
+# rain 0.5.0
 
 ## Breaking Changes
 
