@@ -1,9 +1,13 @@
 # rain (development version)
 
-## Breaking CHanges
+## Breaking Changes
 
 * In `R/pca_report.R`,
-    + Code refactoring.
+    + Code refactoring using `data.table`.
+* In `R/compute_pca.R`,
+    + Code refactoring using `data.table`.
+    + Tweak ethnicity figure.
+    + Add an ethnicity figure focussing on the studied cohort.
 
 # rain 0.4.1
 

@@ -17,6 +17,7 @@ estimate_ethnicity(
   quality_threshold = 0.9,
   recode = "all",
   vcf_half_call = "missing",
+  n_comp = 10,
   n_cores = 6,
   bin_path = list(vcftools = "/usr/bin/vcftools", bcftools = "/usr/bin/bcftools", bgzip
     = "/usr/bin/bgzip", tabix = "/usr/bin/tabix", plink = "/usr/bin/plink1.9")
@@ -50,6 +51,8 @@ estimate_ethnicity(
 + 'haploid'/'h': Treat half-calls as haploid/homozygous (the PLINK 1 file format does not distinguish between the two). This maximizes similarity between the VCF and BCF2 parsers.
 + 'missing'/'m': Treat half-calls as missing (default).
 + 'reference'/'r': Treat the missing part as reference.}
+
+\item{n_comp}{A \code{numeric}. The number of principal components to be computed.}
 
 \item{n_cores}{An \code{integer}. The number of CPUs to use to estimate the ethnicity.}
 

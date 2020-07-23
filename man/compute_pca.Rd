@@ -4,7 +4,13 @@
 \alias{compute_pca}
 \title{Compute the genomic components (and some figures) for ethnicity based on VCF files.}
 \usage{
-compute_pca(cohort_name, input_plink, output_directory, ref1kg_population)
+compute_pca(
+  cohort_name,
+  input_plink,
+  output_directory,
+  ref1kg_population,
+  n_comp = 10
+)
 }
 \arguments{
 \item{cohort_name}{A \code{character}. A name to describe the studied population compared to 1,000 Genomes.}
@@ -14,6 +20,8 @@ compute_pca(cohort_name, input_plink, output_directory, ref1kg_population)
 \item{output_directory}{A \code{character}. The path where the data and figures is written.}
 
 \item{ref1kg_population}{A \code{character}. A file which describe samples and their ethnicity.}
+
+\item{n_comp}{A \code{numeric}. The number of principal components to be computed.}
 }
 \value{
 A \code{data.frame}.
