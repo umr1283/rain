@@ -17,6 +17,7 @@
 #' @import data.table
 #' @import ggplot2
 #' @import gt
+#' @import patchwork
 #'
 #' @examples
 #'
@@ -101,14 +102,17 @@ pca_report <- function(
       x = paste0(
         .data[["x"]],
         "<br><i style='font-size:5pt;'>(",
-          scales::percent_format(accuracy = 0.01, suffix = " %")(.data[["y"]]),
-        ")</i>"
+          format(.data[["y"]] * 100, digits = 2, nsmall = 2),
+        " %)</i>"
       ),
       y = .data[["y"]]
     )
   ) +
-    ggplot2::geom_col(width = 1, colour = "white", fill = scales::viridis_pal(begin = 0.5, end = 0.5)(1), na.rm = TRUE) +
-    ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 0.1, suffix = " %"), expand = ggplot2::expansion(mult = c(0, 0.05))) +
+    ggplot2::geom_col(width = 1, colour = "white", fill = "#21908CFF", na.rm = TRUE) +
+    ggplot2::scale_y_continuous(
+      labels = function(x) paste(format(x * 100, digits = 2, nsmall = 2), "%"),
+      expand = ggplot2::expansion(mult = c(0, 0.05))
+    ) +
     ggplot2::labs(
       x = "Principal Components",
       y = "Contribution"
@@ -146,7 +150,7 @@ pca_report <- function(
           label = gsub(
             pattern = "(.*)e([-+]*)0*(.*)",
             replacement = "\\1<br>&times;<br>10<sup>\\2\\3</sup>",
-            x = scales::scientific(.data[["Pr(>F)"]], digits = 2)
+            x = format(.data[["Pr(>F)"]], digits = 2, nsmall = 2, scientific = TRUE)
           )
         ),
         colour = "white",
@@ -162,8 +166,12 @@ pca_report <- function(
         labels = function(x) {
           paste0(
             x, "<br><i style='font-size:5pt;'>(",
-            scales::percent_format(accuracy = 0.01, suffix = " %")((pca_res$values / sum(pca_res$values))[as.numeric(gsub("PC", "", x))]),
-            ")</i>"
+            format(
+              x = (pca_res$values / sum(pca_res$values))[as.numeric(gsub("PC", "", x))] * 100,
+              digits = 2,
+              nsmall = 2
+            ),
+            " %)</i>"
           )
         }
       ) +

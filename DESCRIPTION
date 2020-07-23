@@ -24,8 +24,12 @@ Depends:
 Imports:
     data.table (>= 1.12.8),
     flashpcaR (>= 2.1),
+    fs (>= 1.4.1),
+    ggforce (>= 0.3.2),
     ggplot2 (>= 3.3.2),
-    gt (>= 0.2.1)
+    ggtext (>= 0.1.0),
+    gt (>= 0.2.1),
+    patchwork (>= 1.0.1)
 Suggests:
     roxygen2 (>= 7.1.0)
 Remotes: 
