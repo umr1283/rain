@@ -1,5 +1,10 @@
 # rain (development version)
 
+## Minor text improvements
+
+* In `R/pca_report.R`,
+    + Remove unnecessary lower condition for outliers.
+
 # rain 0.5.0
 
 ## Breaking Changes
