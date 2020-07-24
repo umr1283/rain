@@ -251,10 +251,7 @@ pca_report <- function(
       factor(
         x = x > (
           stats::quantile(x, 0.75, na.rm = TRUE) + outliers_threshold * stats::IQR(x, na.rm = TRUE)
-        ) |
-          x < (
-            stats::quantile(x, 0.25, na.rm = TRUE) - outliers_threshold * stats::IQR(x, na.rm = TRUE)
-          ),
+        ),
         levels = c(FALSE, TRUE),
         labels = c("No", "Yes")
       )
