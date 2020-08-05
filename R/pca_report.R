@@ -69,7 +69,7 @@ pca_report <- function(
   fig_n_comp <- min(c(n_comp, 3, ncol(pca_methylation)))
 
   keep_technical <- names(which(sapply(pca_phenotypes[,
-    lapply(.SD, function(x) data.table::uniqueN(x) > 1 & data.table::uniqueN(x) < length(x)),
+    lapply(.SD, function(x) (data.table::uniqueN(x) > 1 & data.table::uniqueN(x) < length(x))) | is.numeric(x),
     .SDcols = technical_vars
   ], isTRUE)))
 
@@ -85,7 +85,7 @@ pca_report <- function(
 
   pca_res <- flashpcaR::flashpca(X = t(pca_methylation), stand = "sd", ndim = n_comp)
 
-  pca_dfxy <- data.table::as.data.table(pca_res[["projection"]], keep.rownames = id_var)
+  pca_dfxy <- data.table::as.data.table(pca_res[["vectors"]], keep.rownames = id_var)
   data.table::setnames(
     x = pca_dfxy,
     old = setdiff(names(pca_dfxy), id_var),
@@ -95,8 +95,8 @@ pca_report <- function(
 
   p_inertia <- ggplot2::ggplot(
     data = data.table::data.table(
-      y = (pca_res$values / sum(pca_res$values)),
-      x = sprintf("PC%02d", seq_along(pca_res$values))
+      y = pca_res[["pve"]],
+      x = sprintf("PC%02d", seq_along(pca_res[["pve"]]))
     )[1:fig_n_comp],
     mapping = ggplot2::aes(
       x = paste0(
@@ -167,7 +167,7 @@ pca_report <- function(
           paste0(
             x, "<br><i style='font-size:5pt;'>(",
             format(
-              x = (pca_res$values / sum(pca_res$values))[as.numeric(gsub("PC", "", x))] * 100,
+              x = pca_res[["pve"]][as.numeric(gsub("PC", "", x))] * 100,
               digits = 2,
               nsmall = 2
             ),
@@ -293,9 +293,8 @@ pca_report <- function(
     patchwork::plot_annotation(
       title = "Outliers Detection In Factorial Planes",
       caption = paste0(
-        "Outliers defined for a Euclidean distance from cohort centroid (based on the principal components up to ", fig_n_comp, "):<br>",
-        "&bull; higher than ", outliers_threshold, " times the interquartile range above the 75<sup>th</sup> percentile.<br>",
-        "&bull; lower than ", outliers_threshold, " times the interquartile range below the 25<sup>th</sup> percentile.<br>",
+        "Outliers defined for a Euclidean distance from cohort centroid (based on the principal components up to ", fig_n_comp, ")<br>",
+        "higher than ", outliers_threshold, " times the interquartile range above the 75<sup>th</sup> percentile.<br>",
         "Contribution computed using ", n_comp," principal components."
       ),
       tag_levels = "A",
