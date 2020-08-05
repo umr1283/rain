@@ -4,6 +4,8 @@
 
 * In `R/pca_report.R`,
     + Remove unnecessary lower condition for outliers.
+* In `R/compute_pca.R`,
+    + Fix explained variance histogram.
 
 # rain 0.5.0
 
