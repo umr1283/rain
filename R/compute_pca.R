@@ -27,11 +27,11 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
   pca_contrib <- sprintf(
     fmt = "PC%02d (%s %%)",
     1:n_comp,
-    format(pca_res$values / sum(pca_res$values) * 100, digits = 2, nsmall = 2, trim = TRUE)
+    format(pca_res[["pve"]] * 100, digits = 2, nsmall = 2, trim = TRUE)
   )
   names(pca_contrib) <- sprintf("PC%02d", 1:n_comp)
 
-  pca_dfxy <- data.table::as.data.table(pca_res[["projection"]], keep.rownames = "iid")
+  pca_dfxy <- data.table::as.data.table(pca_res[["vectors"]], keep.rownames = "iid")
   data.table::setnames(
     x = pca_dfxy,
     old = setdiff(names(pca_dfxy), "iid"),
