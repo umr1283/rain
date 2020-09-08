@@ -120,37 +120,54 @@ pca_report <- function(
     pca_theme
 
   if (length(keep_technical) > 0) {
-    cat(section_prefix, "## Independent Association Tests\n\n", sep = "")
-    p_association <- ggplot2::ggplot(
-      data = melt(
-        data = pca_dfxy,
-        measure.vars = grep("^PC[0-9]+$", names(pca_dfxy), value = TRUE),
-        variable.name = "pc",
-        value.name = "values"
-      )[pc %in% sprintf("PC%02d", 1:n_comp)][,
-        # as.data.table(
-        #   anova(
-        #     lm(
-        #       formula = as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
-        #       data = .SD
-        #     )
-        #   ),
-        #   keep.rownames = "term"
-        # )[term != "Residuals"],
-        rbindlist(lapply(X = keep_technical, .data = .SD, FUN = function(.x, .data) {
-          as.data.table(
-            anova(
-              lm(
-                formula = as.formula(paste0("values ~ ", .x)),
+    cat(section_prefix, "## Association Tests\n\n", sep = "")
+    asso_dt <- data.table::melt(
+      data = pca_dfxy,
+      measure.vars = grep("^PC[0-9]+$", names(pca_dfxy), value = TRUE),
+      variable.name = "pc",
+      value.name = "values"
+    )[pc %in% sprintf("PC%02d", 1:n_comp)][,
+      {
+        m <- stats::model.matrix(
+          object = stats::as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
+          data = .SD
+        )
+
+        if (qr(m)$rank == ncol(m)) {
+          out <- data.table::as.data.table(
+            stats::anova(
+              stats::lm(
+                formula = stats::as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
                 data = .SD
               )
             ),
             keep.rownames = "term"
           )[term != "Residuals"]
-        })),
-        by = "pc"
-      ],
-      mapping = ggplot2::aes(x = factor(.data[["pc"]]), y = .data[["term"]], fill = .data[["Pr(>F)"]])
+        } else {
+          out <- data.table::rbindlist(lapply(X = keep_technical, .data = .SD, FUN = function(.x, .data) {
+            data.table::as.data.table(
+              stats::anova(
+                stats::lm(
+                  formula = stats::as.formula(paste0("values ~ ", .x)),
+                  data = .SD
+                )
+              ),
+              keep.rownames = "term"
+            )[term != "Residuals"]
+          }))
+        }
+        out[, full_rank := qr(m)$rank == ncol(m)]
+      },
+      by = "pc"
+    ]
+
+    p_association <- ggplot2::ggplot(
+      data = asso_dt,
+      mapping = ggplot2::aes(
+        x = factor(.data[["pc"]]),
+        y = factor(.data[["term"]], levels = sort(unique(.data[["term"]]), decreasing = TRUE)),
+        fill = .data[["Pr(>F)"]]
+      )
     ) +
       ggplot2::geom_tile(colour = "white", na.rm = TRUE) +
       ggtext::geom_richtext(
@@ -187,8 +204,15 @@ pca_report <- function(
       ggplot2::labs(
         x = "Principal Components",
         y = "Variables",
-        title = "Independent Association Tests Between Variables And Principal Components",
-        caption = "Variables are tested against principal components using ANOVA."
+        title = "Association Tests Between Variables And Principal Components",
+        caption = ifelse(
+          test = all(asso_dt[["full_rank"]]),
+          yes = "Variables are tested against principal components using ANOVA.",
+          no = paste(
+            "Variables are independently tested against principal components using ANOVA",
+            "(*i.e.*, model matrix is not full rank)."
+          )
+        )
       ) +
       pca_theme
 
