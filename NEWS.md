@@ -4,6 +4,8 @@
 
 * In `R/pca_report.R`,
     + Remove unnecessary lower condition for outliers.
+    + Update obsolete captions.
+    + Perform independent association testing between technical variables and principal components.
 * In `R/compute_pca.R`,
     + Fix explained variance histogram.
 

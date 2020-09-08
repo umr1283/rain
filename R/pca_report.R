@@ -120,28 +120,36 @@ pca_report <- function(
     pca_theme
 
   if (length(keep_technical) > 0) {
-    cat(section_prefix, "## Association Tests\n\n", sep = "")
-    asso_dt <- data.table::melt(
-      data = pca_dfxy,
-      measure.vars = grep("^PC[0-9]+$", names(pca_dfxy), value = TRUE),
-      variable.name = "pc",
-      value.name = "values"
-    )
-    asso_dt <- asso_dt[asso_dt[["pc"]] %in% sprintf("PC%02d", 1:n_comp)]
-    asso_dt <- asso_dt[,
-      data.table::as.data.table(
-        stats::anova(
-          stats::lm(
-            formula = stats::as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
-            data = .SD
-          )
-        ),
-        keep.rownames = "term"
-      ),
-      by = "pc"
-    ]
+    cat(section_prefix, "## Independent Association Tests\n\n", sep = "")
     p_association <- ggplot2::ggplot(
-      data = asso_dt[asso_dt[["term"]] != "Residuals"],
+      data = melt(
+        data = pca_dfxy,
+        measure.vars = grep("^PC[0-9]+$", names(pca_dfxy), value = TRUE),
+        variable.name = "pc",
+        value.name = "values"
+      )[pc %in% sprintf("PC%02d", 1:n_comp)][,
+        # as.data.table(
+        #   anova(
+        #     lm(
+        #       formula = as.formula(paste0("values ~ ", paste(keep_technical, collapse = " + "))),
+        #       data = .SD
+        #     )
+        #   ),
+        #   keep.rownames = "term"
+        # )[term != "Residuals"],
+        rbindlist(lapply(X = keep_technical, .data = .SD, FUN = function(.x, .data) {
+          as.data.table(
+            anova(
+              lm(
+                formula = as.formula(paste0("values ~ ", .x)),
+                data = .SD
+              )
+            ),
+            keep.rownames = "term"
+          )[term != "Residuals"]
+        })),
+        by = "pc"
+      ],
       mapping = ggplot2::aes(x = factor(.data[["pc"]]), y = .data[["term"]], fill = .data[["Pr(>F)"]])
     ) +
       ggplot2::geom_tile(colour = "white", na.rm = TRUE) +
@@ -175,15 +183,12 @@ pca_report <- function(
           )
         }
       ) +
-      ggplot2::scale_y_discrete(expand = c(0, 0)) +
+      ggplot2::scale_y_discrete(expand = c(0, 0), labels = toupper) +
       ggplot2::labs(
         x = "Principal Components",
         y = "Variables",
-        title = "Association Tests Between Variables And Principal Components",
-        caption = paste0(
-          "Contribution computed using ", n_comp," principal components.<br>",
-          "Variables are tested against principal components using ANOVA."
-        )
+        title = "Independent Association Tests Between Variables And Principal Components",
+        caption = "Variables are tested against principal components using ANOVA."
       ) +
       pca_theme
 
@@ -231,7 +236,6 @@ pca_report <- function(
       ) +
         patchwork::plot_annotation(
           title = paste0("Structure Detection For: '<i>", ivar, "</i>'"),
-          caption = paste0("Contribution computed using ", n_comp," principal components."),
           tag_levels = "A",
           theme = pca_theme
         )
@@ -294,8 +298,7 @@ pca_report <- function(
       title = "Outliers Detection In Factorial Planes",
       caption = paste0(
         "Outliers defined for a Euclidean distance from cohort centroid (based on the principal components up to ", fig_n_comp, ")<br>",
-        "higher than ", outliers_threshold, " times the interquartile range above the 75<sup>th</sup> percentile.<br>",
-        "Contribution computed using ", n_comp," principal components."
+        "higher than ", outliers_threshold, " times the interquartile range above the 75<sup>th</sup> percentile."
       ),
       tag_levels = "A",
       theme = pca_theme
