@@ -9,6 +9,8 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![GitHub
 tag](https://img.shields.io/github/tag/mcanouil/rain.svg?label=latest%20tag&include_prereleases)](https://github.com/mcanouil/rain)
+[![R build
+status](https://github.com/mcanouil/rain/workflows/R-CMD-check/badge.svg)](https://github.com/mcanouil/rain/actions)
 <!-- badges: end -->
 
 ## Installation
