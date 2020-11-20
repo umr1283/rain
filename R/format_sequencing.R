@@ -13,10 +13,7 @@ format_sequencing <- function(
   vcf_half_call,
   bin_path
 ) {
-  merged_vcfs <- merge_vcf(
-    input_vcfs = input_vcfs,
-    bin_path = bin_path
-  )
+  merged_vcfs <- merge_vcf(input_vcfs = input_vcfs, bin_path = bin_path)
 
   format_vcf(
     input_vcfs = merged_vcfs,
