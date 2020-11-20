@@ -5,13 +5,10 @@
 #'
 #' @return A `data.frame`.
 #'
-#' @import data.table
-#' @import ggplot2
-#' @import gt
-#' @import patchwork
-#'
 #' @export
 compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_population, n_comp = 10) {
+  PC01 <- PC02 <- dist <- which_closest <- pop <- super_pop <- NULL # For global variable warnings
+
   message_prefix <- "[rain] "
 
   message(message_prefix, "Performing PCA ...", appendLF = TRUE)
@@ -75,7 +72,6 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     by = "pop"
   ]
 
-  PC01 <- PC02 <- dist <- which_closest <- pop <- super_pop <- NULL
   pca_dfxy[,
     "pop_closest" := (function(.x, .y) {
       as.character(

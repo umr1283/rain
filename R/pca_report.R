@@ -9,15 +9,12 @@
 #' @param n_comp A `numeric`. The number of principal components to be computed.
 #' @param fig_n_comp A `numeric`. The number of principal components to be used for figures.
 #' @param outliers_threshold A `numeric`. The threshold to define outliers.
+#' @param outliers_quantile A `numeric`. The upper quantile percentile to use to define outliers,
+#'     with `n x > quantile(x, outliers_quantile) + outliers_threshold * IQR(x)`.
 #' @param title_level A `numeric`. The markdown title level, *i.e.*, the number of `#` preceding the section.
 #'
 #' @return A `data.frame`.
 #' @export
-#'
-#' @import data.table
-#' @import ggplot2
-#' @import gt
-#' @import patchwork
 #'
 #' @examples
 #'
@@ -30,6 +27,7 @@
 #'     n_comp = 5,
 #'     fig_n_comp = 5,
 #'     outliers_threshold = 3,
+#'     outliers_quantile = 0.75,
 #'     title_level = 0
 #'   )
 #' }
@@ -42,6 +40,7 @@ pca_report <- function(
   n_comp = 10,
   fig_n_comp = n_comp,
   outliers_threshold = 1.5,
+  outliers_quantile = 0.75,
   title_level = 3
 ) {
   .data <- ggplot2::.data
@@ -69,7 +68,9 @@ pca_report <- function(
   fig_n_comp <- min(c(n_comp, 3, ncol(pca_methylation)))
 
   keep_technical <- names(which(sapply(pca_phenotypes[,
-    lapply(.SD, function(x) (data.table::uniqueN(x) > 1 & data.table::uniqueN(x) < length(x))) | is.numeric(x),
+    lapply(.SD, function(x) {
+      (data.table::uniqueN(x) > 1 & data.table::uniqueN(x) < length(x)) | is.numeric(x)
+    }),
     .SDcols = technical_vars
   ], isTRUE)))
 
@@ -97,8 +98,9 @@ pca_report <- function(
     data = data.table::data.table(
       y = pca_res[["pve"]],
       x = sprintf("PC%02d", seq_along(pca_res[["pve"]]))
-    )[1:fig_n_comp],
-    mapping = ggplot2::aes(
+    )[1:fig_n_comp]
+  ) +
+    ggplot2::aes(
       x = paste0(
         .data[["x"]],
         "<br><i style='font-size:5pt;'>(",
@@ -106,8 +108,7 @@ pca_report <- function(
         " %)</i>"
       ),
       y = .data[["y"]]
-    )
-  ) +
+    ) +
     ggplot2::geom_col(width = 1, colour = "white", fill = "#21908CFF", na.rm = TRUE) +
     ggplot2::scale_y_continuous(
       labels = function(x) paste(format(x * 100, digits = 2, nsmall = 2), "%"),
@@ -161,27 +162,36 @@ pca_report <- function(
       by = "pc"
     ]
 
-    p_association <- ggplot2::ggplot(
-      data = asso_dt,
-      mapping = ggplot2::aes(
+    p_association <- ggplot2::ggplot(data = asso_dt) +
+      ggplot2::aes(
         x = factor(.data[["pc"]]),
-        y = factor(.data[["term"]], levels = sort(unique(.data[["term"]]), decreasing = TRUE)),
+        y = factor(
+          x = .data[["term"]],
+          levels = data.table::setorderv(
+            x = data.table::dcast(
+              data = asso_dt[, .(pc, term, `Pr(>F)` = data.table::fifelse(`Pr(>F)` <= 0.1, `Pr(>F)`, NA_real_))],
+              formula = term ~ pc,
+              value.var = "Pr(>F)"
+            ),
+            cols = levels(asso_dt[["pc"]]),
+            order = -1
+          )[["term"]]
+        ),
         fill = .data[["Pr(>F)"]]
-      )
-    ) +
+      ) +
       ggplot2::geom_tile(colour = "white", na.rm = TRUE) +
       ggtext::geom_richtext(
         mapping = ggplot2::aes(
           label = gsub(
             pattern = "(.*)e([-+]*)0*(.*)",
-            replacement = "\\1<br>&times;<br>10<sup>\\2\\3</sup>",
+            replacement = "\\1 &times; 10<sup>\\2\\3</sup>",
             x = format(.data[["Pr(>F)"]], digits = 2, nsmall = 2, scientific = TRUE)
           )
         ),
         colour = "white",
         fill = NA,
         label.colour = NA,
-        size = 2.5,
+        size = 1.25,
         na.rm = TRUE
       ) +
       ggplot2::scale_fill_viridis_c(name = "P-Value", na.value = "grey85", end = 0.75, limits = c(0, 0.1)) +
@@ -278,7 +288,7 @@ pca_report <- function(
     "is_outlier" := lapply(.SD, function(x) {
       factor(
         x = x > (
-          stats::quantile(x, 0.75, na.rm = TRUE) + outliers_threshold * stats::IQR(x, na.rm = TRUE)
+          stats::quantile(x, outliers_quantile, na.rm = TRUE) + outliers_threshold * stats::IQR(x, na.rm = TRUE)
         ),
         levels = c(FALSE, TRUE),
         labels = c("No", "Yes")
