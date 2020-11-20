@@ -43,6 +43,7 @@ pca_report <- function(
   outliers_quantile = 0.75,
   title_level = 3
 ) {
+  pc <- term <- `Pr(>F)` <- NULL # For global variable warnings
   .data <- ggplot2::.data
   `%>%` <- gt::`%>%`
 
@@ -157,7 +158,7 @@ pca_report <- function(
             )[term != "Residuals"]
           }))
         }
-        out[, full_rank := qr(m)$rank == ncol(m)]
+        out[, "full_rank" := qr(m)$rank == ncol(m)]
       },
       by = "pc"
     ]
@@ -169,7 +170,7 @@ pca_report <- function(
           x = .data[["term"]],
           levels = data.table::setorderv(
             x = data.table::dcast(
-              data = asso_dt[, .(pc, term, `Pr(>F)` = data.table::fifelse(`Pr(>F)` <= 0.1, `Pr(>F)`, NA_real_))],
+              data = asso_dt[, list(pc, term, `Pr(>F)` = data.table::fifelse(`Pr(>F)` <= 0.1, `Pr(>F)`, NA_real_))],
               formula = term ~ pc,
               value.var = "Pr(>F)"
             ),

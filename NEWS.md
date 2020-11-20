@@ -1,4 +1,4 @@
-# rain (development version)
+# rain 0.5.1
 
 ## Minor text improvements
 
@@ -6,6 +6,7 @@
     + Remove unnecessary lower condition for outliers.
     + Update obsolete captions.
     + Perform independent association testing between technical variables and principal components.
+    + Order association plot according to pvalues and principal components.
 * In `R/compute_pca.R`,
     + Fix explained variance histogram.
 
