@@ -12,6 +12,7 @@ pca_report(
   n_comp = 10,
   fig_n_comp = n_comp,
   outliers_threshold = 1.5,
+  outliers_quantile = 0.75,
   title_level = 3
 )
 }
@@ -29,6 +30,9 @@ pca_report(
 \item{fig_n_comp}{A \code{numeric}. The number of principal components to be used for figures.}
 
 \item{outliers_threshold}{A \code{numeric}. The threshold to define outliers.}
+
+\item{outliers_quantile}{A \code{numeric}. The upper quantile percentile to use to define outliers,
+with \verb{n x > quantile(x, outliers_quantile) + outliers_threshold * IQR(x)}.}
 
 \item{title_level}{A \code{numeric}. The markdown title level, \emph{i.e.}, the number of \verb{#} preceding the section.}
 }
@@ -49,6 +53,7 @@ if (interactive()) {
     n_comp = 5,
     fig_n_comp = 5,
     outliers_threshold = 3,
+    outliers_quantile = 0.75,
     title_level = 0
   )
 }

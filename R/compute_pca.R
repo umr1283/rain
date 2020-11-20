@@ -8,6 +8,7 @@
 #' @export
 compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_population, n_comp = 10) {
   PC01 <- PC02 <- dist <- which_closest <- pop <- super_pop <- NULL # For global variable warnings
+  .data <- ggplot2::.data
 
   message_prefix <- "[rain] "
 
