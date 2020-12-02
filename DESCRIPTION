@@ -15,7 +15,7 @@ Authors@R:
 Description: Compute ancestry inference (principal component analysis) of a set of individuals 
     using either array or sequencing data (i.e., plink or VCF format) 
     and a reference panel (e.g., 1,000 genomes project).
-License: GPL-3
+License: MIT + file LICENSE
 URL: https://github.com/mcanouil/rain,
     https://mcanouil.github.io/rain
 BugReports: https://github.com/mcanouil/rain/issues
