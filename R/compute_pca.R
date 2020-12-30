@@ -155,7 +155,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     patchwork::plot_layout(nrow = 2, ncol = 1) +
     patchwork::plot_annotation(
       tag_levels = c("A", "1"),
-      title = "Ethnicty Inference Based On 1,000 Genomes Project Data",
+      title = "Ethnicity Inference Based On 1,000 Genomes Project Data",
       subtitle = gsub("<br>W", " w", p_subtitle),
       theme = ggplot2::theme(plot.title.position = "plot", plot.subtitle = ggtext::element_markdown())
     )
@@ -219,7 +219,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     patchwork::plot_layout(nrow = 2, ncol = 1) +
     patchwork::plot_annotation(
       tag_levels = "A",
-      title = "Ethnicty Inference Based On 1,000 Genomes Project Data",
+      title = "Ethnicity Inference Based On 1,000 Genomes Project Data",
       subtitle = p_subtitle,
       theme = ggplot2::theme(plot.title.position = "plot", plot.subtitle = ggtext::element_markdown())
     )
