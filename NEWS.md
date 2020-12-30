@@ -1,5 +1,10 @@
 # rain (development version)
 
+## Minor text improvements
+
+* In `R/compute_pca.R`,
+    + Fix typos.
+
 # rain 0.5.1
 
 ## Minor text improvements
