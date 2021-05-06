@@ -110,8 +110,8 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       con.arrow = ggplot2::arrow(angle = 45, length = ggplot2::unit(2, "mm")),
       label.colour = "grey50",
       con.colour = "grey50",
-      label.fontsize = 6,
-      label.buffer = ggplot2::unit(5, "mm")
+      label.fontsize = 5,
+      label.buffer = ggplot2::unit(2.5, "mm")
     ) +
     ggplot2::geom_point(
       data = ~ .x[!cohort %in% "1,000 Genomes"],
@@ -145,7 +145,9 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
             " SNPs, with <b>A</b>) population level and <b>B</b>) super population level"
           ),
           tag_levels = "A",
-          theme = ggplot2::theme(plot.subtitle = ggtext::element_markdown())
+          theme = ggplot2::theme(
+            plot.subtitle = ggtext::element_markdown(face = "italic", size = ggtext::rel(0.80))
+          )
         )
     )
   invisible(grDevices::dev.off())
