@@ -22,19 +22,22 @@ BugReports: https://github.com/mcanouil/rain/issues
 Depends: 
     R (>= 3.5.0)
 Imports: 
+    concaveman (>= 1.0.0),
     data.table (>= 1.13.2),
     flashpcaR (>= 2.1),
     fs (>= 1.5.0),
     ggforce (>= 0.3.2),
     ggplot2 (>= 3.3.2),
     ggtext (>= 0.1.0),
+    grDevices,
     gt (>= 0.2.2),
     parallel,
     patchwork (>= 1.0.1),
+    ragg (>= 1.0.0),
     stats,
     utils
 Suggests:
-    roxygen2 (>= 7.1.0)
+    roxygen2 (>= 7.1.1)
 Remotes: 
     github::gabraham/flashpca/flashpcaR
 Encoding: UTF-8
