@@ -4,6 +4,7 @@
 
 * In `R/compute_pca.R`,
     + Fix typos.
+    + Major figure upgrade.R
 
 # rain 0.5.1
 
