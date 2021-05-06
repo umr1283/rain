@@ -7,7 +7,8 @@
 #'
 #' @export
 compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_population, n_comp = 10) {
-  PC01 <- PC02 <- dist <- which_closest <- pop <- super_pop <- NULL # For global variable warnings
+  PC01 <- PC02 <- dist <- which_closest <- NULL # For global variable warnings
+  pop <- super_pop <- pop_closest <- cohort <- NULL # For global variable warnings
   .data <- ggplot2::.data
 
   message_prefix <- "[rain] "
@@ -22,24 +23,14 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
 
   pca_res <- flashpcaR::flashpca(input_plink, ndim = n_comp)
 
-  pca_contrib <- sprintf(
-    fmt = "PC%02d (%s %%)",
-    1:n_comp,
-    format(pca_res[["pve"]] * 100, digits = 2, nsmall = 2, trim = TRUE)
-  )
-  names(pca_contrib) <- sprintf("PC%02d", 1:n_comp)
+  pca_contrib <- compute_pve(pca_res[["pve"]])
 
-  pca_dfxy <- data.table::as.data.table(pca_res[["vectors"]], keep.rownames = "iid")
-  data.table::setnames(
-    x = pca_dfxy,
-    old = setdiff(names(pca_dfxy), "iid"),
-    new = sprintf("PC%02d", as.numeric(gsub("V", "", setdiff(names(pca_dfxy), "iid"))))
-  )
+  pca_dfxy <- compute_vec(pca_res[["vectors"]])
 
   if (all.equal(fid_iid[[1]], fid_iid[[2]])) {
-    pca_dfxy[, "iid" := fid_iid[[2]]]
+    pca_dfxy[j = "iid" := fid_iid[[2]]]
   } else {
-    pca_dfxy[, "iid" := paste(fid_iid[[1]], fid_iid[[2]], sep = "/")]
+    pca_dfxy[j = "iid" := paste(fid_iid[[1]], fid_iid[[2]], sep = "/")]
   }
 
   ref_pop_table <- data.table::fread(
@@ -47,19 +38,16 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     colClasses = "character",
     header = FALSE,
     col.names = c("iid", "pop", "super_pop", "sex")
-  )
+  )[j = "cohort" := "1,000 Genomes"]
 
-  pca_dfxy <- merge(
-    x = pca_dfxy,
-    y = ref_pop_table[, "cohort" := "1,000 Genomes"],
-    by = "iid",
-    all = TRUE
-  )
+  pca_dfxy <- merge(x = pca_dfxy, y = ref_pop_table, by = "iid", all = TRUE)
 
   cohort <- NULL
-  pca_dfxy[!cohort %in% "1,000 Genomes", (c("pop", "super_pop", "cohort")) := list(cohort_name, cohort_name, cohort_name)]
-  pca_dfxy[,
-    (c("pop", "super_pop", "cohort")) := lapply(
+  pca_dfxy[
+    i = !cohort %in% "1,000 Genomes",
+    j = (c("pop", "super_pop", "cohort")) := list(cohort_name, cohort_name, cohort_name)
+  ][
+    j = (c("pop", "super_pop", "cohort")) := lapply(
       X = .SD,
       FUN = function(x) factor(x, levels = c(cohort_name, sort(setdiff(x, cohort_name))))
     ),
@@ -67,23 +55,21 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
   ]
 
   pop_centre <- pca_dfxy[
-    cohort %in% "1,000 Genomes",
-    lapply(.SD, mean),
+    i = cohort %in% "1,000 Genomes",
+    j = lapply(.SD, mean),
     .SDcols = sprintf("PC%02d", 1:2),
     by = "pop"
   ]
 
-  pca_dfxy[,
-    "pop_closest" := (function(.x, .y) {
+  pca_dfxy[
+    j = "pop_closest" := (function(.x, .y) {
       as.character(
-        pop_centre[,
-          list("dist" = sqrt((.x - PC01)^2 + (.y - PC02)^2)),
+        pop_centre[
+          j = list("dist" = sqrt((.x - PC01)^2 + (.y - PC02)^2)),
           by = "pop"
-        ][,
-          "which_closest" := dist == min(dist)
         ][
-          (which_closest)
-        ][["pop"]]
+          j = "which_closest" := dist == min(dist)
+        ][(which_closest)][["pop"]]
       )
     })(PC01, PC02),
     by = "iid"
@@ -96,160 +82,107 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     all.x = TRUE
   )
 
-  p <- lapply(
-    X = c("pop" = "pop", "super_pop" = "super_pop"),
-    FUN = function(ipop) {
-      ggplot2::ggplot(
-        data = pca_dfxy,
-        mapping = ggplot2::aes(x = .data[["PC01"]], y = .data[["PC02"]], colour = .data[[ipop]])
-      ) +
-        ggplot2::theme_light(base_size = 11) +
-      	ggplot2::geom_hline(yintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
-      	ggplot2::geom_vline(xintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
-        ggforce::geom_mark_ellipse(mapping = ggplot2::aes(fill = .data[[ipop]]), con.cap = 0, alpha = 0.1) +
-        ggplot2::geom_point(mapping = ggplot2::aes(shape = .data[[ipop]]), na.rm = TRUE) +
-      	ggplot2::scale_colour_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
-        ggplot2::scale_fill_viridis_d(na.translate = FALSE, drop = FALSE, end = 0.9) +
-        ggplot2::scale_shape_manual(values = c(3, rep(1, length(unique(pca_dfxy[[ipop]]))))) +
-        ggplot2::labs(
-          x = pca_contrib["PC01"],
-          y = pca_contrib["PC02"],
-          shape = c("super_pop" = "Super Population", "pop" = "Population")[ipop],
-          colour = c("super_pop" = "Super Population", "pop" = "Population")[ipop],
-          fill = c("super_pop" = "Super Population", "pop" = "Population")[ipop]
-        ) +
-        ggplot2::facet_grid(cols = ggplot2::vars(.data[["cohort"]])) +
-        ggplot2::guides(
-          colour = ggplot2::guide_legend(
-            ncol = 2,
-            label.theme = ggplot2::element_text(size = 8),
-            keyheight = ggplot2::unit(9, "point")
-          )
-        )
-  })
-
-  p_zoom <- lapply(
-    X = p,
-    FUN = function(.p) {
-      .p +
-        ggplot2::coord_cartesian(
-          xlim = range(pca_dfxy[!cohort %in% "1,000 Genomes"][["PC01"]]),
-          ylim = range(pca_dfxy[!cohort %in% "1,000 Genomes"][["PC02"]])
-        )
-    }
-  )
-
-  p_subtitle <- paste0(
-    "Principal Component Analysis using ",
-    format(nrow(data.table::fread(paste0(input_plink, ".bim"))), big.mark = ",", digits = 0),
-    " SNPs<br>",
-    "With A) population level and B) super population level"
-  )
-
-  p_ethni <- patchwork::wrap_plots(
-    patchwork::wrap_plots(p[["pop"]], p_zoom[["pop"]]) +
-      patchwork::plot_layout(tag_level = "new", guides = "collect"),
-    patchwork::wrap_plots(p[["super_pop"]], p_zoom[["super_pop"]]) +
-      patchwork::plot_layout(tag_level = "new", guides = "collect")
-  ) +
-    patchwork::plot_layout(nrow = 2, ncol = 1) +
-    patchwork::plot_annotation(
-      tag_levels = c("A", "1"),
-      title = "Ethnicity Inference Based On 1,000 Genomes Project Data",
-      subtitle = gsub("<br>W", " w", p_subtitle),
-      theme = ggplot2::theme(plot.title.position = "plot", plot.subtitle = ggtext::element_markdown())
+  p1 <- ggplot2::ggplot(
+    data = data.table::setnames(
+      x = pca_dfxy[
+        j = .SD[
+          pop %in% .SD[!cohort %in% "1,000 Genomes", unique(pop_closest)] |
+            !cohort %in% "1,000 Genomes"
+        ]
+      ],
+      old = names(pca_contrib),
+      new = pca_contrib
     )
-
-  p_cohort_base <- ggplot2::ggplot(
-    data = pca_dfxy[!cohort %in% "1,000 Genomes"],
-    mapping = ggplot2::aes(x = .data[["PC01"]], y = .data[["PC02"]])
   ) +
-    ggplot2::theme_light(base_size = 11) +
+    ggplot2::aes(
+      x = .data[[pca_contrib[["PC01"]]]],
+      y = .data[[pca_contrib[["PC02"]]]],
+      colour = pop, fill = pop, label = pop
+    ) +
   	ggplot2::geom_hline(yintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
   	ggplot2::geom_vline(xintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
+    ggforce::geom_mark_hull(
+      data = ~ .x[cohort %in% "1,000 Genomes"],
+      concavity = 2,
+      expand = ggplot2::unit(1, "mm"),
+      radius = ggplot2::unit(1, "mm"),
+      con.cap = ggplot2::unit(0, "mm"),
+      con.arrow = ggplot2::arrow(angle = 45, length = ggplot2::unit(2, "mm")),
+      label.colour = "grey50",
+      con.colour = "grey50",
+      label.fontsize = 6,
+      label.buffer = ggplot2::unit(5, "mm")
+    ) +
+    ggplot2::geom_point(
+      data = ~ .x[!cohort %in% "1,000 Genomes"],
+      colour = "black",
+      shape = 21
+    ) +
+    ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.15)) +
+    ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.15)) +
   	ggplot2::scale_colour_viridis_d(na.translate = FALSE, drop = FALSE, begin = 0.10, end = 0.90) +
     ggplot2::scale_fill_viridis_d(na.translate = FALSE, drop = FALSE, begin = 0.10, end = 0.90) +
-    ggplot2::guides(
-      colour = ggplot2::guide_legend(
-        ncol = ifelse(nrow(unique(pca_dfxy[!cohort %in% "1,000 Genomes", "pop_closest"])) > 5, 2, 1)
-      )
-    ) +
-    ggplot2::theme(plot.title.position = "plot") +
-    ggplot2::coord_cartesian(
-      xlim = range(pca_dfxy[!cohort %in% "1,000 Genomes"][["PC01"]]),
-      ylim = range(pca_dfxy[!cohort %in% "1,000 Genomes"][["PC02"]])
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      plot.title.position = "plot",
+      plot.caption.position = "plot",
+      legend.position = "none"
     )
 
-  p_cohort <- patchwork::wrap_plots(
-    p_cohort_base +
-      ggplot2::geom_point(mapping = ggplot2::aes(colour = .data[["pop_closest"]]), shape = 1, na.rm = TRUE) +
-      ggforce::geom_mark_ellipse(
-        mapping = ggplot2::aes(
-          colour = .data[["pop_closest"]],
-          group = .data[["pop_closest"]]
-        ),
-        fill = "transparent",
-        alpha = 0.10
-      ) +
-      ggplot2::labs(
-        x = pca_contrib["PC01"],
-        y = pca_contrib["PC02"],
-        shape = "Population",
-        colour = "Population",
-        fill = "Population"
-      ),
-    p_cohort_base +
-      ggplot2::geom_point(mapping = ggplot2::aes(colour = .data[["super_pop_closest"]]), shape = 1, na.rm = TRUE) +
-      ggforce::geom_mark_ellipse(
-        mapping = ggplot2::aes(
-          colour = .data[["super_pop_closest"]],
-          group = .data[["super_pop_closest"]]
-        ),
-        fill = "transparent",
-        alpha = 0.10
-      ) +
-      ggplot2::labs(
-        x = pca_contrib["PC01"],
-        y = pca_contrib["PC02"],
-        shape = "Super Population",
-        colour = "Super Population",
-        fill = "Super Population"
-      )
-  ) +
-    patchwork::plot_layout(nrow = 2, ncol = 1) +
-    patchwork::plot_annotation(
-      tag_levels = "A",
-      title = "Ethnicity Inference Based On 1,000 Genomes Project Data",
-      subtitle = p_subtitle,
-      theme = ggplot2::theme(plot.title.position = "plot", plot.subtitle = ggtext::element_markdown())
-    )
+  p2 <- p1 + ggplot2::aes(colour = super_pop, fill = super_pop, label = super_pop)
 
-  message(message_prefix, "Exporting ...")
-  ggplot2::ggsave(
-    filename = file.path(output_directory, paste0(cohort_name, "_ethnicity_1kg.pdf")),
-    plot = p_ethni,
-    width = 29.7 - 5,
-    height = 21 - 5,
-    units = "cm",
-    dpi = 120
+  ragg::agg_png(
+    filename = file.path(output_directory, sprintf("%s_ethnicity_1kg.png", cohort_name)),
+    width = 16, height = 9, units = "cm", res = 300, scaling = 0.75
   )
-  ggplot2::ggsave(
-    filename = file.path(output_directory, paste0(cohort_name, "_ethnicity.pdf")),
-    plot = p_cohort,
-    width = 16,
-    height = 16,
-    units = "cm",
-    dpi = 120
-  )
+    print(
+      patchwork::wrap_plots(p1, p2, ncol = 2) +
+        patchwork::plot_annotation(
+          title = "Ethnicity Inference Based On 1,000 Genomes Project Data",
+          subtitle = paste0(
+            "Principal Component Analysis using ",
+            format(nrow(data.table::fread(paste0(input_plink, ".bim"))), big.mark = ",", digits = 0),
+            " SNPs, with <b>A</b>) population level and <b>B</b>) super population level"
+          ),
+          tag_levels = "A",
+          theme = ggplot2::theme(plot.subtitle = ggtext::element_markdown())
+        )
+    )
+  invisible(grDevices::dev.off())
 
   invisible(
     data.table::fwrite(
       x = pca_dfxy[
-        !cohort %in% "1,000 Genomes",
-        .SD,
-        .SDcols = c("iid", sprintf("PC%02d", 1:n_comp), "cohort", "pop_closest", "super_pop_closest")
+        # i = !cohort %in% "1,000 Genomes",
+        j = .SD,
+        .SDcols = c(
+          "iid", sprintf("PC%02d", 1:n_comp),
+          "cohort", "pop_closest", "super_pop_closest", "pop", "super_pop"
+        )
       ],
-      file = file.path(output_directory, paste0(cohort_name, "_ethnicity.csv"))
+      file = file.path(output_directory, paste0(cohort_name, "_ethnicity_1kg.csv"))
     )
   )
+}
+
+#' @keywords internal
+compute_pve <- function(pve) {
+  pve_dt <- sprintf(
+    fmt = "PC%02d (%s %%)",
+    seq_along(pve),
+    format(pve * 100, digits = 2, nsmall = 2, trim = TRUE)
+  )
+  names(pve_dt) <- sprintf("PC%02d", seq_along(pve))
+  pve_dt
+}
+
+#' @keywords internal
+compute_vec <- function(vec) {
+  vec_dt <- data.table::as.data.table(vec, keep.rownames = "iid")
+  data.table::setnames(
+    x = vec_dt,
+    old = setdiff(names(vec_dt), "iid"),
+    new = sprintf("PC%02d", as.numeric(gsub("V", "", setdiff(names(vec_dt), "iid"))))
+  )
+  vec_dt
 }
