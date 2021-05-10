@@ -146,7 +146,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
           ),
           tag_levels = "A",
           theme = ggplot2::theme(
-            plot.subtitle = ggtext::element_markdown(face = "italic", size = ggtext::rel(0.80))
+            plot.subtitle = ggtext::element_markdown(face = "italic", size = ggplot2::rel(0.80))
           )
         )
     )
