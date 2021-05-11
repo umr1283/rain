@@ -1,4 +1,4 @@
-# rain (development version)
+# rain 0.6.0
 
 ## Minor text improvements
 
