@@ -13,9 +13,8 @@ Compute ancestry inference (principal component analysis) of a set of individual
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/mcanouil/rain}
-  \item \url{https://mcanouil.github.io/rain}
-  \item Report bugs at \url{https://github.com/mcanouil/rain/issues}
+  \item \url{https://github.com/umr1283/rain/}
+  \item Report bugs at \url{https://github.com/umr1283/rain/issues/}
 }
 
 }

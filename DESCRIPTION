@@ -16,9 +16,8 @@ Description: Compute ancestry inference (principal component analysis) of a set 
     using either array or sequencing data (i.e., plink or VCF format) 
     and a reference panel (e.g., 1,000 genomes project).
 License: MIT + file LICENSE
-URL: https://github.com/mcanouil/rain,
-    https://mcanouil.github.io/rain
-BugReports: https://github.com/mcanouil/rain/issues
+URL: https://github.com/umr1283/rain/
+BugReports: https://github.com/umr1283/rain/issues/
 Depends: 
     R (>= 3.5.0)
 Imports: 
