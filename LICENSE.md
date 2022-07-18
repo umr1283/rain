@@ -1,6 +1,6 @@
 # MIT License
 
-Copyright (c) 2020-2022 Mickaël Canouil
+Copyright (c) 2020-2022 Mickaël Canouil, Mathilde Boissel, Inserm U1283 / CNRS UMR 8199
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
