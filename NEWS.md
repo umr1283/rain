@@ -1,4 +1,8 @@
-# rain (development version)
+# rain 0.7.0
+
+- Fix `digits = 0` in `format()` no longer supported in R `>4.2.0`.
+- Fix CI workflows not using latest GitHub Actions and `pak`.
+- Fix `Remotes` field of `DESCRIPTION` to use "local" `flashpcaR`.
 
 # rain 0.6.0
 
