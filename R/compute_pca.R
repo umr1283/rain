@@ -99,8 +99,8 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       y = .data[[pca_contrib[["PC02"]]]],
       colour = pop, fill = pop, label = pop
     ) +
-  	ggplot2::geom_hline(yintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
-  	ggplot2::geom_vline(xintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
+    ggplot2::geom_hline(yintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
+    ggplot2::geom_vline(xintercept = 0, linetype = 2, size = 0.5, na.rm = TRUE) +
     ggforce::geom_mark_hull(
       data = ~ .x[cohort %in% "1,000 Genomes"],
       concavity = 2,
@@ -120,7 +120,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
     ) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.15)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.15)) +
-  	ggplot2::scale_colour_viridis_d(na.translate = FALSE, drop = FALSE, begin = 0.10, end = 0.90) +
+    ggplot2::scale_colour_viridis_d(na.translate = FALSE, drop = FALSE, begin = 0.10, end = 0.90) +
     ggplot2::scale_fill_viridis_d(na.translate = FALSE, drop = FALSE, begin = 0.10, end = 0.90) +
     ggplot2::theme_minimal() +
     ggplot2::theme(
