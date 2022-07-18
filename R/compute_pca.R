@@ -141,7 +141,7 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
           title = "Ethnicity Inference Based On 1,000 Genomes Project Data",
           subtitle = paste0(
             "Principal Component Analysis using ",
-            format(nrow(data.table::fread(paste0(input_plink, ".bim"))), big.mark = ",", digits = 0),
+            format(nrow(data.table::fread(paste0(input_plink, ".bim"))), big.mark = ",", digits = 1),
             " SNPs, with <b>A</b>) population level and <b>B</b>) super population level"
           ),
           tag_levels = "A",
