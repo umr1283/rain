@@ -18,6 +18,8 @@
 #'     + 'reference'/'r': Treat the missing part as reference.
 #' @param n_comp A `numeric`. The number of principal components to be computed.
 #' @param n_cores An `integer`. The number of CPUs to use to estimate the ethnicity.
+#' @param point_size A `numeric`. The size of the points drawn by `geom_point()`.
+#' @param label_fontsize A `numeric`. The font size of the labels drawn by `geom_mark_hull()`.
 #' @param bin_path A `list(character)`. A list giving the binary path of
 #'   `vcftools`, `bcftools`, `bgzip`, `tabix` and `plink`.
 #'
@@ -38,6 +40,8 @@ estimate_ethnicity <- function(
   vcf_half_call = "missing",
   n_comp = 10,
   n_cores = 6,
+  point_size = 0.75,
+  label_fontsize = 5
   bin_path = list(
     vcftools = "/usr/bin/vcftools",
     bcftools = "/usr/bin/bcftools",
@@ -132,7 +136,9 @@ estimate_ethnicity <- function(
     input_plink = file.path(output_directory, "all"),
     output_directory = output_directory,
     ref1kg_population = ref1kg_population,
-    n_comp = n_comp
+    n_comp = n_comp,
+    point_size = point_size,
+    label_fontsize = label_fontsize
   )
 
 }
