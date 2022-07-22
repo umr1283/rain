@@ -9,7 +9,9 @@ compute_pca(
   input_plink,
   output_directory,
   ref1kg_population,
-  n_comp = 10
+  n_comp = 10,
+  point_size = 0.75,
+  label_fontsize = 5
 )
 }
 \arguments{
@@ -22,6 +24,10 @@ compute_pca(
 \item{ref1kg_population}{A \code{character}. A file which describe samples and their ethnicity.}
 
 \item{n_comp}{A \code{numeric}. The number of principal components to be computed.}
+
+\item{point_size}{A \code{numeric}. The size of the points drawn by \code{geom_point()}.}
+
+\item{label_fontsize}{A \code{numeric}. The font size of the labels drawn by \code{geom_mark_hull()}.}
 }
 \value{
 A \code{data.frame}.
