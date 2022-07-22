@@ -41,7 +41,7 @@ estimate_ethnicity <- function(
   n_comp = 10,
   n_cores = 6,
   point_size = 0.75,
-  label_fontsize = 5
+  label_fontsize = 5,
   bin_path = list(
     vcftools = "/usr/bin/vcftools",
     bcftools = "/usr/bin/bcftools",
