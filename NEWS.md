@@ -1,3 +1,9 @@
+# rain 0.7.1
+
+- chore(DESCRIPTION): update email address.
+
+**Full Changelog**: <https://github.com/umr1283/rain/compare/v0.7.0...v0.7.1>
+
 # rain 0.7.0
 
 - Fix `digits = 0` in `format()` no longer supported in R `>4.2.0`.
