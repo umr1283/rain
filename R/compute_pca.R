@@ -6,7 +6,15 @@
 #' @return A `data.frame`.
 #'
 #' @export
-compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_population, n_comp = 10) {
+compute_pca <- function(
+  cohort_name,
+  input_plink,
+  output_directory,
+  ref1kg_population,
+  n_comp = 10,
+  point_size = 0.75,
+  label_fontsize = 5
+) {
   PC01 <- PC02 <- dist <- which_closest <- NULL # For global variable warnings
   pop <- super_pop <- pop_closest <- cohort <- NULL # For global variable warnings
   .data <- ggplot2::.data
@@ -110,13 +118,14 @@ compute_pca <- function(cohort_name, input_plink, output_directory, ref1kg_popul
       con.arrow = ggplot2::arrow(angle = 45, length = ggplot2::unit(2, "mm")),
       label.colour = "grey50",
       con.colour = "grey50",
-      label.fontsize = 5,
+      label.fontsize = label_fontsize,
       label.buffer = ggplot2::unit(2.5, "mm")
     ) +
     ggplot2::geom_point(
       data = ~ .x[!cohort %in% "1,000 Genomes"],
       colour = "black",
-      shape = 21
+      shape = 21,
+      size = point_size
     ) +
     ggplot2::scale_x_continuous(expand = ggplot2::expansion(mult = 0.15)) +
     ggplot2::scale_y_continuous(expand = ggplot2::expansion(mult = 0.15)) +

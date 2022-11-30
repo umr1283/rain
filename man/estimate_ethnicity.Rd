@@ -19,8 +19,10 @@ estimate_ethnicity(
   vcf_half_call = "missing",
   n_comp = 10,
   n_cores = 6,
-  bin_path = list(vcftools = "/usr/bin/vcftools", bcftools = "/usr/bin/bcftools", bgzip
-    = "/usr/bin/bgzip", tabix = "/usr/bin/tabix", plink = "/usr/bin/plink1.9")
+  point_size = 0.75,
+  label_fontsize = 5,
+  bin_path = list(vcftools = "/usr/bin/vcftools", bcftools = "/usr/bin/bcftools", bgzip =
+    "/usr/bin/bgzip", tabix = "/usr/bin/tabix", plink = "/usr/bin/plink1.9")
 )
 }
 \arguments{
@@ -55,6 +57,10 @@ estimate_ethnicity(
 \item{n_comp}{A \code{numeric}. The number of principal components to be computed.}
 
 \item{n_cores}{An \code{integer}. The number of CPUs to use to estimate the ethnicity.}
+
+\item{point_size}{A \code{numeric}. The size of the points drawn by \code{geom_point()}.}
+
+\item{label_fontsize}{A \code{numeric}. The font size of the labels drawn by \code{geom_mark_hull()}.}
 
 \item{bin_path}{A \code{list(character)}. A list giving the binary path of
 \code{vcftools}, \code{bcftools}, \code{bgzip}, \code{tabix} and \code{plink}.}

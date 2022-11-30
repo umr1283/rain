@@ -6,9 +6,7 @@
 \alias{rain-package}
 \title{rain: Reference-based Ancestry INference}
 \description{
-Compute ancestry inference (principal component analysis) of a set of individuals 
-    using either array or sequencing data (i.e., plink or VCF format) 
-    and a reference panel (e.g., 1,000 genomes project).
+Compute ancestry inference (principal component analysis) of a set of individuals using either array or sequencing data (i.e., plink or VCF format) and a reference panel (e.g., 1,000 genomes project).
 }
 \seealso{
 Useful links:
